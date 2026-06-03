@@ -4,6 +4,15 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [x] Replace the settings panel close button with one always-visible toggle button whose label/state changes.
+- [x] Localize visible UI text to Japanese by default.
+- [x] Add language-switching infrastructure without rendering a language selector UI.
+- [x] Simplify image thumbnails by hiding file names, dimensions, and data-size text.
+- [x] Remove current-image file name and dimensions from the editor header.
+- [x] Validate the adjusted UI with lint, tests, e2e, and rendered screenshots.
+
+## Completed Layout Iteration
+
 - [x] Keep the active image visible without page-level scrolling after large batch import.
 - [x] Make the queue list scroll inside its panel instead of expanding the whole page.
 - [x] Make `Original extension` the default export format and preserve loaded image extensions where canvas export supports them.

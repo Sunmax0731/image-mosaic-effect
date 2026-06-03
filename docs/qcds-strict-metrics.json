@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "project": "image-mosaic-effect",
-  "updatedAt": "2026-06-03T10:19:39+09:00",
+  "updatedAt": "2026-06-03T10:58:59+09:00",
   "ratings": {
     "quality": "A-",
     "cost": "A+",
@@ -25,13 +25,13 @@
       "name": "unit-and-build",
       "command": "npm test",
       "status": "passed",
-      "evidence": "Vitest 3 files / 10 tests passed; Vite production build passed."
+      "evidence": "Vitest 4 files / 12 tests passed; Vite production build passed."
     },
     {
       "name": "runtime-gate",
       "command": "npm run test:e2e",
       "status": "passed",
-      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include queue scroll, visible canvas, settings toggle, canvas edit, persisted suffix, and ZIP export."
+      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, thumbnail-only queue, queue scroll, visible canvas, settings toggle, canvas edit, persisted suffix, and ZIP export."
     },
     {
       "name": "production-preview",

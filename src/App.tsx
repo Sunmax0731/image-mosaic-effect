@@ -12,13 +12,17 @@ import {
   SlidersHorizontal,
   SquareDashedMousePointer,
   Undo2,
-  X,
 } from 'lucide-react'
 import './App.css'
+import { resolveExportTarget } from './lib/fileNames'
 import {
-  readableBytes,
-  resolveExportTarget,
-} from './lib/fileNames'
+  loadLanguage,
+  normalizeLanguage,
+  saveLanguage,
+  UI_COPY,
+  type Language,
+  type UiCopy,
+} from './lib/i18n'
 import {
   createBrushOperation,
   createRectangleOperation,
@@ -46,11 +50,32 @@ import type {
 
 const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 const TOOL_OPTIONS = [
-  { id: 'brush', label: 'Brush', Icon: Brush },
-  { id: 'rectangle', label: 'Rect', Icon: SquareDashedMousePointer },
+  { id: 'brush', Icon: Brush },
+  { id: 'rectangle', Icon: SquareDashedMousePointer },
 ] as const
 
+type StatusState =
+  | { key: 'settingsSaved' }
+  | { key: 'noSupportedImages' }
+  | { key: 'imageDecodeFailed' }
+  | { key: 'lastOperationRemoved' }
+  | { key: 'currentImageReset' }
+  | { key: 'preparingExport' }
+  | { key: 'exportFailed' }
+  | { key: 'imagesImported'; count: number }
+  | { key: 'exportedImages'; count: number }
+
+declare global {
+  interface Window {
+    imageMosaicEffect?: {
+      getLanguage: () => Language
+      setLanguage: (language: Language) => void
+    }
+  }
+}
+
 function App() {
+  const [language, setLanguage] = useState<Language>(() => loadLanguage())
   const [settings, setSettings] = useState<MosaicSettings>(() => loadSettings())
   const [images, setImages] = useState<ImageEntry[]>([])
   const [activeId, setActiveId] = useState<string>()
@@ -58,7 +83,7 @@ function App() {
   const [canvasSize, setCanvasSize] = useState({ width: 1, height: 1 })
   const [isExporting, setIsExporting] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(true)
-  const [status, setStatus] = useState('Settings saved locally')
+  const [status, setStatus] = useState<StatusState>({ key: 'settingsSaved' })
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const activeImageRef = useRef<HTMLImageElement | null>(null)
@@ -73,10 +98,24 @@ function App() {
   const activeIndex = images.findIndex((image) => image.id === activeId)
   const activeImage = activeIndex >= 0 ? images[activeIndex] : undefined
   const editedCount = images.filter((image) => image.operations.length > 0).length
+  const copy = UI_COPY[language]
+  const statusText = getStatusText(copy, status)
 
   useEffect(() => {
     saveSettings(settings)
   }, [settings])
+
+  useEffect(() => {
+    saveLanguage(language)
+    window.imageMosaicEffect = {
+      getLanguage: () => language,
+      setLanguage: (nextLanguage) => setLanguage(normalizeLanguage(nextLanguage)),
+    }
+
+    return () => {
+      delete window.imageMosaicEffect
+    }
+  }, [language])
 
   useEffect(() => {
     imagesRef.current = images
@@ -117,7 +156,7 @@ function App() {
           )
         }
       })
-      .catch(() => setStatus('Image decode failed'))
+      .catch(() => setStatus({ key: 'imageDecodeFailed' }))
 
     return () => {
       cancelled = true
@@ -126,7 +165,7 @@ function App() {
 
   const updateSettings = useCallback((patch: Partial<MosaicSettings>) => {
     setSettings((current) => normalizeSettings({ ...current, ...patch }))
-    setStatus('Settings saved locally')
+    setStatus({ key: 'settingsSaved' })
   }, [])
 
   const addOperation = useCallback(
@@ -170,13 +209,13 @@ function App() {
         }))
 
       if (!nextImages.length) {
-        setStatus('No supported images selected')
+        setStatus({ key: 'noSupportedImages' })
         return
       }
 
       setImages((current) => [...current, ...nextImages])
       setActiveId((current) => current ?? nextImages[0].id)
-      setStatus(`${nextImages.length} images imported`)
+      setStatus({ key: 'imagesImported', count: nextImages.length })
     },
     [],
   )
@@ -193,7 +232,7 @@ function App() {
           : entry,
       ),
     )
-    setStatus('Last operation removed')
+    setStatus({ key: 'lastOperationRemoved' })
   }, [activeImage])
 
   const resetActiveImage = useCallback(() => {
@@ -208,7 +247,7 @@ function App() {
           : entry,
       ),
     )
-    setStatus('Current image reset')
+    setStatus({ key: 'currentImageReset' })
   }, [activeImage])
 
   const goToImage = useCallback(
@@ -292,7 +331,7 @@ function App() {
     }
 
     setIsExporting(true)
-    setStatus('Preparing ZIP export')
+    setStatus({ key: 'preparingExport' })
 
     try {
       const zip = new JSZip()
@@ -314,9 +353,9 @@ function App() {
 
       const archive = await zip.generateAsync({ type: 'blob' })
       downloadBlob(archive, 'image-mosaic-effect-export.zip')
-      setStatus(`Exported ${images.length} images as ZIP`)
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Export failed')
+      setStatus({ key: 'exportedImages', count: images.length })
+    } catch {
+      setStatus({ key: 'exportFailed' })
     } finally {
       setIsExporting(false)
     }
@@ -339,21 +378,21 @@ function App() {
     <div className="app-shell">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark">IM</span>
+          <span className="brand-mark">{copy.brandMark}</span>
           <div>
-            <h1>Image Mosaic Effect</h1>
-            <p>{status}</p>
+            <h1>{copy.appTitle}</h1>
+            <p>{statusText}</p>
           </div>
         </div>
 
         <div className="topbar-actions">
           <button type="button" className="button" onClick={() => fileInputRef.current?.click()}>
             <Images aria-hidden="true" />
-            Import files
+            {copy.actions.importFiles}
           </button>
           <button type="button" className="button" onClick={() => folderInputRef.current?.click()}>
             <FolderOpen aria-hidden="true" />
-            Import folder
+            {copy.actions.importFolder}
           </button>
           <button
             type="button"
@@ -362,16 +401,17 @@ function App() {
             onClick={exportAll}
           >
             <Download aria-hidden="true" />
-            {isExporting ? 'Exporting' : 'Export all'}
+            {isExporting ? copy.actions.exporting : copy.actions.exportAll}
           </button>
           <button
             type="button"
-            className="icon-button settings-toggle"
-            title={settingsOpen ? 'Hide settings' : 'Show settings'}
+            className={`button settings-toggle ${settingsOpen ? 'is-active' : ''}`}
+            title={settingsOpen ? copy.actions.hideSettings : copy.actions.showSettings}
             aria-pressed={settingsOpen}
             onClick={() => setSettingsOpen((current) => !current)}
           >
             <SlidersHorizontal aria-hidden="true" />
+            {settingsOpen ? copy.actions.hideSettings : copy.actions.showSettings}
           </button>
         </div>
 
@@ -397,13 +437,11 @@ function App() {
       </header>
 
       <main className={`workspace ${settingsOpen ? '' : 'settings-collapsed'}`}>
-        <aside className="queue-panel" aria-label="Image queue">
+        <aside className="queue-panel" aria-label={copy.queue.label}>
           <div className="panel-header">
             <div>
-              <h2>Queue</h2>
-              <p>
-                {editedCount}/{images.length} edited
-              </p>
+              <h2>{copy.queue.title}</h2>
+              <p>{copy.queue.count(editedCount, images.length)}</p>
             </div>
           </div>
           <div className="image-list">
@@ -412,37 +450,31 @@ function App() {
                 key={image.id}
                 type="button"
                 className={`image-row ${image.id === activeId ? 'is-active' : ''}`}
+                aria-label={copy.queue.thumbnailLabel(
+                  index + 1,
+                  images.length,
+                  image.operations.length > 0,
+                )}
                 onClick={() => setActiveId(image.id)}
               >
                 <img src={image.url} alt="" />
-                <span>
-                  <strong>{image.name}</strong>
-                  <small>
-                    {index + 1} / {images.length} - {image.operations.length} ops -{' '}
-                    {readableBytes(image.size)}
-                  </small>
-                </span>
               </button>
             ))}
-            {!images.length && <div className="empty-list">No images</div>}
+            {!images.length && <div className="empty-list">{copy.queue.empty}</div>}
           </div>
         </aside>
 
-        <section className="canvas-panel" aria-label="Mosaic editor">
+        <section className="canvas-panel" aria-label={copy.editor.label}>
           <div className="canvas-toolbar">
             <div>
-              <h2>{activeImage?.name ?? 'Ready'}</h2>
-              <p>
-                {activeImage?.width && activeImage.height
-                  ? `${activeImage.width} x ${activeImage.height}px`
-                  : 'Import images to start'}
-              </p>
+              <h2>{activeImage ? copy.editor.activeTitle : copy.editor.readyTitle}</h2>
+              <p>{activeImage ? copy.editor.activeHint : copy.editor.readyHint}</p>
             </div>
             <div className="icon-actions">
               <button
                 type="button"
                 className="icon-button"
-                title="Previous image"
+                title={copy.editor.previous}
                 disabled={activeIndex <= 0}
                 onClick={() => goToImage(-1)}
               >
@@ -451,7 +483,7 @@ function App() {
               <button
                 type="button"
                 className="icon-button"
-                title="Next image"
+                title={copy.editor.next}
                 disabled={activeIndex < 0 || activeIndex >= images.length - 1}
                 onClick={() => goToImage(1)}
               >
@@ -460,7 +492,7 @@ function App() {
               <button
                 type="button"
                 className="icon-button"
-                title="Undo"
+                title={copy.editor.undo}
                 disabled={!activeImage?.operations.length}
                 onClick={undoOperation}
               >
@@ -469,7 +501,7 @@ function App() {
               <button
                 type="button"
                 className="icon-button"
-                title="Reset image"
+                title={copy.editor.reset}
                 disabled={!activeImage?.operations.length}
                 onClick={resetActiveImage}
               >
@@ -484,6 +516,7 @@ function App() {
                 <canvas
                   ref={canvasRef}
                   data-testid="mosaic-canvas"
+                  aria-label={copy.editor.canvasLabel}
                   onPointerDown={handlePointerDown}
                   onPointerMove={handlePointerMove}
                   onPointerUp={handlePointerUp}
@@ -497,41 +530,34 @@ function App() {
             ) : (
               <div className="empty-stage">
                 <Images aria-hidden="true" />
-                <strong>Import local images</strong>
-                <span>Files stay in this browser session.</span>
+                <strong>{copy.editor.emptyTitle}</strong>
+                <span>{copy.editor.emptyBody}</span>
               </div>
             )}
           </div>
 
           <footer className="bottom-status">
             <span>
-              {activeIndex >= 0 ? activeIndex + 1 : 0} / {images.length}
+              {copy.editor.progress(activeIndex >= 0 ? activeIndex + 1 : 0, images.length)}
             </span>
-            <span>{settings.drawTool === 'brush' ? 'Brush mode' : 'Rectangle mode'}</span>
-            <span>{settings.mosaicType}</span>
+            <span>{copy.editor.toolMode[settings.drawTool]}</span>
+            <span>{copy.settings.mosaicTypes[settings.mosaicType]}</span>
           </footer>
         </section>
 
-        {settingsOpen && <aside className="settings-panel" aria-label="Mosaic settings">
+        {settingsOpen && <aside className="settings-panel" aria-label={copy.settings.label}>
           <div className="panel-header">
             <div>
-              <h2>Settings</h2>
+              <h2>{copy.settings.title}</h2>
               <p>
-                <Save aria-hidden="true" /> Persisted
+                <Save aria-hidden="true" /> {copy.settings.persisted}
               </p>
             </div>
-            <button
-              type="button"
-              className="icon-button"
-              title="Hide settings"
-              onClick={() => setSettingsOpen(false)}
-            >
-              <X aria-hidden="true" />
-            </button>
+            <SlidersHorizontal aria-hidden="true" />
           </div>
 
           <fieldset>
-            <legend>Mosaic type</legend>
+            <legend>{copy.settings.mosaicType}</legend>
             <div className="segmented">
               {(['pixelate', 'blur', 'noise'] as MosaicType[]).map((type) => (
                 <button
@@ -540,14 +566,14 @@ function App() {
                   className={settings.mosaicType === type ? 'is-selected' : ''}
                   onClick={() => updateSettings({ mosaicType: type })}
                 >
-                  {type}
+                  {copy.settings.mosaicTypes[type]}
                 </button>
               ))}
             </div>
           </fieldset>
 
           <fieldset>
-            <legend>Tool</legend>
+            <legend>{copy.settings.tool}</legend>
             <div className="tool-grid">
               {TOOL_OPTIONS.map((item) => (
                 <button
@@ -557,14 +583,14 @@ function App() {
                   onClick={() => updateSettings({ drawTool: item.id as DrawTool })}
                 >
                   <item.Icon aria-hidden="true" />
-                  {item.label}
+                  {copy.settings.tools[item.id]}
                 </button>
               ))}
             </div>
           </fieldset>
 
           <RangeControl
-            label="Brush size"
+            label={copy.settings.brushSize}
             value={settings.brushSize}
             min={16}
             max={220}
@@ -573,7 +599,7 @@ function App() {
             onChange={(brushSize) => updateSettings({ brushSize })}
           />
           <RangeControl
-            label="Block size"
+            label={copy.settings.blockSize}
             value={settings.blockSize}
             min={4}
             max={48}
@@ -582,7 +608,7 @@ function App() {
             onChange={(blockSize) => updateSettings({ blockSize })}
           />
           <RangeControl
-            label="Strength"
+            label={copy.settings.strength}
             value={Math.round(settings.strength * 100)}
             min={10}
             max={100}
@@ -592,7 +618,7 @@ function App() {
           />
 
           <label className="field">
-            <span>File suffix</span>
+            <span>{copy.settings.fileSuffix}</span>
             <input
               value={settings.suffix}
               maxLength={32}
@@ -601,16 +627,16 @@ function App() {
           </label>
 
           <label className="field">
-            <span>Export format</span>
+            <span>{copy.settings.exportFormat}</span>
             <select
               value={settings.exportFormat}
               onChange={(event) =>
                 updateSettings({ exportFormat: event.currentTarget.value as ExportFormat })
               }
             >
-              <option value="original">Original extension</option>
-              <option value="png">PNG</option>
-              <option value="jpeg">JPEG</option>
+              <option value="original">{copy.settings.originalExtension}</option>
+              <option value="png">{copy.settings.png}</option>
+              <option value="jpeg">{copy.settings.jpeg}</option>
             </select>
           </label>
 
@@ -619,10 +645,10 @@ function App() {
             className="button reset-settings"
             onClick={() => {
               setSettings(DEFAULT_SETTINGS)
-              setStatus('Settings saved locally')
+              setStatus({ key: 'settingsSaved' })
             }}
           >
-            Reset settings
+            {copy.settings.reset}
           </button>
         </aside>}
       </main>
@@ -660,6 +686,17 @@ function RangeControl({ label, value, min, max, step, suffix, onChange }: RangeC
       />
     </label>
   )
+}
+
+function getStatusText(copy: UiCopy, status: StatusState) {
+  switch (status.key) {
+    case 'imagesImported':
+      return copy.status.imagesImported(status.count)
+    case 'exportedImages':
+      return copy.status.exportedImages(status.count)
+    default:
+      return copy.status[status.key]
+  }
 }
 
 function getRelativePath(file: File) {

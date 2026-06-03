@@ -7,10 +7,15 @@ test('imports an image, applies a brush operation, persists settings, and export
   page,
 }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Image Mosaic Effect' })).toBeVisible()
-  await expect(page.getByText('No images')).toBeVisible()
+  await expect(page.getByRole('heading', { name: '画像モザイク加工' })).toBeVisible()
+  await expect(page.getByText('画像なし')).toBeVisible()
 
-  await expect(page.getByLabel('Export format')).toHaveValue('original')
+  await page.evaluate(() => window.imageMosaicEffect?.setLanguage('en'))
+  await expect(page.getByRole('heading', { name: 'Image Mosaic Effect' })).toBeVisible()
+  await page.evaluate(() => window.imageMosaicEffect?.setLanguage('ja'))
+  await expect(page.getByRole('heading', { name: '画像モザイク加工' })).toBeVisible()
+
+  await expect(page.getByLabel('保存形式')).toHaveValue('original')
 
   await page.getByTestId('file-input').setInputFiles(
     Array.from({ length: 16 }, (_, index) => ({
@@ -20,7 +25,8 @@ test('imports an image, applies a brush operation, persists settings, and export
     })),
   )
 
-  await expect(page.getByRole('heading', { name: 'sample-01.png' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '編集中' })).toBeVisible()
+  await expect(page.getByText('sample-01.png')).toHaveCount(0)
   await expect(page.getByTestId('mosaic-canvas')).toBeVisible()
   await expect(page.getByTestId('mosaic-canvas')).toBeInViewport()
 
@@ -29,10 +35,10 @@ test('imports an image, applies a brush operation, persists settings, and export
   })
   expect(queueScrolls).toBe(true)
 
-  await page.getByRole('banner').getByTitle('Hide settings').click()
-  await expect(page.getByRole('complementary', { name: 'Mosaic settings' })).toBeHidden()
-  await page.getByRole('banner').getByTitle('Show settings').click()
-  await expect(page.getByRole('complementary', { name: 'Mosaic settings' })).toBeVisible()
+  await page.getByRole('banner').getByTitle('設定を隠す').click()
+  await expect(page.getByRole('complementary', { name: 'モザイク設定' })).toBeHidden()
+  await page.getByRole('banner').getByTitle('設定を表示').click()
+  await expect(page.getByRole('complementary', { name: 'モザイク設定' })).toBeVisible()
 
   const canvas = page.getByTestId('mosaic-canvas')
   const box = await canvas.boundingBox()
@@ -49,14 +55,14 @@ test('imports an image, applies a brush operation, persists settings, and export
     },
   })
 
-  await expect(page.getByText(/[1-9]\d* ops/)).toBeVisible()
+  await expect(page.getByTitle('元に戻す')).toBeEnabled()
 
-  await page.getByLabel('File suffix').fill('_checked')
+  await page.getByLabel('接尾辞').fill('_checked')
   const downloadPromise = page.waitForEvent('download')
-  await page.getByRole('button', { name: /Export all/ }).click()
+  await page.getByRole('button', { name: /一括保存/ }).click()
   const download = await downloadPromise
   expect(download.suggestedFilename()).toBe('image-mosaic-effect-export.zip')
 
   await page.reload()
-  await expect(page.getByLabel('File suffix')).toHaveValue('_checked')
+  await expect(page.getByLabel('接尾辞')).toHaveValue('_checked')
 })
