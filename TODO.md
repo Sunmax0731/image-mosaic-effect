@@ -15,4 +15,4 @@ This file is the work contract for `image-mosaic-effect`.
 - [x] Update docs/design.md and docs/test-plan.md.
 - [x] Create QCDS evaluation and strict metrics JSON.
 - [x] Build, mirror to `D:\AI\GithubPages\image-mosaic-effect`, and package docs ZIP.
-- [ ] Commit and push according to the repository policy.
+- [x] Commit and push according to the repository policy.

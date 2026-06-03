@@ -9,4 +9,4 @@
 - [x] `npm run build` produces `dist/`.
 - [x] `dist/` is mirrored to `D:\AI\GithubPages\image-mosaic-effect`.
 - [x] Docs ZIP is created for release evidence.
-- [ ] Repository commit and push are complete.
+- [x] Repository commit and push are complete.
