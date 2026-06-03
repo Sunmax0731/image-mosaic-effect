@@ -5,10 +5,10 @@
 - `npm run lint`
   - ESLint over TypeScript and React files.
 - `npm test`
-  - Vitest unit tests for settings schema, file names, and mosaic geometry.
+  - Vitest unit tests for settings schema, file names, mosaic geometry, i18n, and preset sizing.
   - TypeScript build and Vite production build.
 - `npm run test:e2e`
-  - Playwright Chromium checks for Japanese default UI, internal language switching API, nonblank render, one-row primary import/export controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, image-list reset, folder import list replacement, auto list reset after export, multi-image import, larger thumbnail-only queue, internal queue scrolling, visible canvas position, mobile horizontal settings groups, single-button settings panel toggle, hidden editor status text, canvas edit, settings persistence, and ZIP export.
+  - Playwright Chromium checks for Japanese default UI, internal language switching API, nonblank render, one-row primary import/export controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, image-list reset, folder import list replacement, auto list reset after export, multi-image import, Fantia/Skeb presets, Before/After toggle, brush drag range visualization, preview fit/zoom/pan controls, mobile auto-collapse after queue selection, larger thumbnail-only queue, internal queue scrolling, visible canvas position, mobile horizontal settings groups, single-button settings panel toggle, hidden editor status text, canvas edit, settings persistence, and ZIP export.
   - Desktop Chrome and mobile Chrome projects are configured.
 
 ## Runtime Gate
@@ -28,14 +28,20 @@ Platform gate for WebApp:
 11. Reset the image list manually and confirm thumbnails and active canvas are cleared.
 12. Confirm the active image is visible in the canvas area without filename, dimension, editor-state, instruction, or bottom status text.
 13. On smartphone width, confirm mosaic/tool, brush/block/strength, and suffix/export format groups each stay on one row without settings-panel scrolling.
-14. Hide and show the settings panel from the same always-visible toolbar button.
-15. Confirm `window.imageMosaicEffect.setLanguage('en')` switches copy internally and `setLanguage('ja')` restores Japanese.
-16. Confirm `Original extension` is the default export format.
-17. Apply a brush or rectangle mosaic operation.
-18. Change a persisted setting and reload to confirm it remains.
-19. Export all and confirm a ZIP download is produced and the image list is cleared after the export.
+14. Confirm Fantia pixelate, Fantia blur, and Skeb 1% presets switch the relevant settings.
+15. Confirm brush and rectangle drag operations display a visible range while dragging.
+16. Confirm Before/After toggles original and edited preview without removing operations.
+17. Confirm fit-to-width, fit-to-height, 100%, zoom in/out, and pan change the preview only.
+18. On smartphone width, select a thumbnail and confirm the image list collapses automatically, then can be reopened.
+19. Hide and show the settings panel from the same always-visible toolbar button.
+20. Confirm `window.imageMosaicEffect.setLanguage('en')` switches copy internally and `setLanguage('ja')` restores Japanese.
+21. Confirm `Original extension` is the default export format.
+22. Apply a brush or rectangle mosaic operation.
+23. Change a persisted setting and reload to confirm it remains.
+24. Export all and confirm a ZIP download is produced and the image list is cleared after the export.
 
 ## Manual Mobile Notes
 
+- See [docs/user-guide.md](user-guide.md) for the user-facing manual checklist.
 - On mobile browsers, folder picking may be unavailable or converted into photo-library selection.
 - ZIP export support should be confirmed on the target phone because download handling differs between mobile browsers.

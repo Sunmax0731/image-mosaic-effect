@@ -13,12 +13,15 @@ describe('i18n', () => {
     expect(UI_COPY.ja.queue.hide).toBe('画像一覧を隠す')
     expect(UI_COPY.ja.queue.reset).toBe('リストをリセット')
     expect(UI_COPY.ja.status.imageListReset).toBe('画像一覧をリセットしました')
+    expect(UI_COPY.ja.editor.fitWidth).toBe('幅に合わせる')
+    expect(UI_COPY.ja.settings.presetLabels.skebPixelate).toBe('Skeb 1%')
   })
 
   it('keeps English copy available for future language controls', () => {
     expect(UI_COPY.en.appTitle).toBe('Image Mosaic Effect')
     expect(UI_COPY.en.queue.show).toBe('Show image list')
     expect(UI_COPY.en.queue.reset).toBe('Reset list')
+    expect(UI_COPY.en.editor.compareBefore).toBe('Before/After preview')
     expect(normalizeLanguage('en')).toBe('en')
     expect(normalizeLanguage('unsupported')).toBe('ja')
   })

@@ -1,60 +1,41 @@
 # Image Mosaic Effect
 
-Image Mosaic Effect is a static browser app for importing local image batches, manually applying mosaic effects, persisting parameters, and exporting suffixed results as a ZIP.
+Image Mosaic Effect は、画像をアップロードせずにブラウザ内だけでモザイク加工できる静的 Web アプリです。複数画像をまとめて読み込み、1枚ずつ範囲指定で加工し、加工済み画像を ZIP として保存できます。
 
-## Features
+## 主な機能
 
-- Add multiple image files, or replace the current list with a browser-supported folder selection.
-- Use a Japanese UI by default; an internal language API is available for future language-switch controls.
-- Browse loaded images in a larger thumbnail-only queue with internal scrolling and a show/hide toggle.
-- Reset the loaded image list manually, and automatically clear it after a successful batch export.
-- Edit one image at a time with brush or rectangle mosaic operations.
-- Choose Pixelate, Blur, or Noise mosaic styles.
-- Tune brush size, block size, strength, suffix, and output format.
-- Use the original image extension by default when exporting; PNG and JPEG can be forced.
-- Toggle the settings panel with one always-visible toolbar button to give the canvas more room.
-- Reset settings from the top toolbar next to the settings show/hide button.
-- Use compact horizontal settings groups on smartphone widths to reduce settings-panel scrolling.
-- Persist settings in localStorage for the next browser session.
-- Export all loaded images with a suffix in a client-side ZIP.
+- ローカル画像の一括読み込み: 複数ファイルを追加できます。対応ブラウザではフォルダ単位の読み込みも使えます。
+- 画像一覧: 読み込んだ画像をサムネイルで確認し、選択、折りたたみ、リセットができます。モバイルでは画像選択後に一覧が自動で折りたたまれます。
+- モザイク編集: ブラシまたは矩形で範囲を指定し、ピクセル化、ぼかし、ノイズの加工を適用できます。
+- ドラッグ範囲表示: ブラシまたは矩形のドラッグ中に、処理対象の範囲を画面上で確認できます。
+- プリセット: Fantia 向けのピクセル化・ぼかし設定と、Skeb 向けに画像長辺の 1% 以上を単位サイズにするピクセル化設定を選べます。
+- Before/After 確認: 編集状態を壊さずに、加工前表示と加工後表示を切り替えられます。
+- プレビュー操作: 幅に合わせる、高さに合わせる、100% 表示、拡大、縮小、パンを使って細部を確認できます。
+- 設定保存: モザイク種類、範囲指定、サイズ、強さ、接尾辞、保存形式をブラウザに保存します。
+- 一括保存: 読み込んだ画像を、指定した接尾辞付きのファイル名で ZIP にまとめて保存します。
 
-## Local Commands
+## 使い方
 
-```powershell
-npm install
-npm run dev
-npm run lint
-npm test
-npm run test:e2e
-npm run build
-```
+1. 「画像を追加」または「フォルダ読込」から画像を読み込みます。
+2. 画像一覧から編集する画像を選びます。
+3. 必要に応じてプリセット、モザイク種類、範囲指定、ブラシサイズ、ブロックサイズ、強さを調整します。
+4. キャンバス上をドラッグしてモザイクを適用します。
+5. Before/After、ズーム、パンで仕上がりを確認します。
+6. 「一括保存」で ZIP をダウンロードします。
 
-## Static Release Shape
+## プライバシー
 
-The app is designed for GitHub Pages and uses `base: './'`, so the built `dist/` directory can be copied to:
+画像処理はブラウザの File API と Canvas で行います。画像のアップロード、サーバー処理、テレメトリ送信はありません。
 
-```text
-D:\AI\GithubPages\image-mosaic-effect
-```
+## ブラウザ上の注意
 
-No server-side image processing is required. User images are read through browser File APIs, edited with Canvas, and exported locally.
+- フォルダ読み込みはブラウザ対応に依存します。モバイルブラウザでは写真選択のみになる場合があります。
+- ZIP のダウンロード動作はブラウザや端末によって異なります。
+- 大きな画像や大量の画像は、端末のメモリや CPU に負荷がかかります。
+- 設定は同じブラウザプロファイル内に保存されます。別端末や別ブラウザには同期されません。
 
-## Static vs Dynamic Implementation Tradeoffs
+## 関連ドキュメント
 
-Compared with a server-backed implementation, the static site has these constraints:
-
-- Folder import support depends on browser File API behavior. Desktop Chromium supports directory selection; mobile browsers may only expose multi-file/photo selection.
-- Direct save-back-to-folder is limited. A ZIP download is the portable static-site path, while server-side or File System Access API workflows can provide stronger folder-write ergonomics.
-- Large image batches use device memory and CPU because processing runs in the browser.
-- Cross-device work history is not shared because settings are persisted locally and images are not uploaded.
-- Background batch processing and audit logging are limited without a backend.
-
-The upside is privacy and deployment simplicity: images never leave the browser, and GitHub Pages can host the app as static assets.
-
-## Repository Docs
-
-- [AGENTS.md](AGENTS.md) - repository rules.
-- [SKILL.md](SKILL.md) - maintenance workflow.
-- [TODO.md](TODO.md) - current work contract.
-- [docs/design.md](docs/design.md) - UI and UX design notes.
-- [docs/test-plan.md](docs/test-plan.md) - validation plan.
+- [ユーザーガイド](docs/user-guide.md)
+- [設計メモ](docs/design.md)
+- [テスト計画](docs/test-plan.md)

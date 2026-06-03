@@ -4,16 +4,23 @@ import {
   Brush,
   ChevronLeft,
   ChevronRight,
+  Columns2,
   Download,
   Eye,
   EyeOff,
   FolderOpen,
   Images,
+  Maximize2,
+  Move,
   RotateCcw,
+  Rows2,
+  ScanEye,
   SlidersHorizontal,
   SquareDashedMousePointer,
   Trash2,
   Undo2,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react'
 import './App.css'
 import { resolveExportTarget } from './lib/fileNames'
@@ -26,6 +33,7 @@ import {
   type UiCopy,
 } from './lib/i18n'
 import {
+  clampRegion,
   createBrushOperation,
   createRectangleOperation,
   getCanvasPoint,
@@ -35,8 +43,10 @@ import {
   renderImageBlob,
   type Rect,
 } from './lib/mosaic'
+import { getPreset, MOSAIC_PRESETS, type MosaicPresetId } from './lib/presets'
 import {
   DEFAULT_SETTINGS,
+  MAX_BLOCK_SIZE,
   loadSettings,
   normalizeSettings,
   saveSettings,
@@ -51,10 +61,18 @@ import type {
 } from './types'
 
 const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+const MOBILE_IMAGE_LIST_QUERY = '(max-width: 640px)'
+const STAGE_VIEW_PADDING = 44
+const MIN_ZOOM = 0.1
+const MAX_ZOOM = 4
+const ZOOM_STEP = 0.25
 const TOOL_OPTIONS = [
   { id: 'brush', Icon: Brush },
   { id: 'rectangle', Icon: SquareDashedMousePointer },
 ] as const
+
+type ViewMode = 'fit-width' | 'fit-height' | 'actual' | 'custom'
+type InteractionMode = 'edit' | 'pan'
 
 type StatusState =
   | { key: 'settingsSaved' }
@@ -65,6 +83,7 @@ type StatusState =
   | { key: 'preparingExport' }
   | { key: 'exportFailed' }
   | { key: 'imageListReset' }
+  | { key: 'presetApplied'; preset: string }
   | { key: 'imagesImported'; count: number }
   | { key: 'exportedImages'; count: number }
 
@@ -87,14 +106,28 @@ function App() {
   const [isExporting, setIsExporting] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(true)
   const [imageListOpen, setImageListOpen] = useState(true)
+  const [showBefore, setShowBefore] = useState(false)
+  const [viewMode, setViewMode] = useState<ViewMode>('fit-width')
+  const [zoomScale, setZoomScale] = useState(1)
+  const [interactionMode, setInteractionMode] = useState<InteractionMode>('edit')
+  const [stageSize, setStageSize] = useState({ width: 1, height: 1 })
   const [status, setStatus] = useState<StatusState>({ key: 'settingsSaved' })
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const stageRef = useRef<HTMLDivElement | null>(null)
   const activeImageRef = useRef<HTMLImageElement | null>(null)
   const imagesRef = useRef<ImageEntry[]>([])
   const drawSessionRef = useRef<{
     start: CanvasPoint
     last: CanvasPoint
+    brushBounds?: Rect
+  } | null>(null)
+  const panSessionRef = useRef<{
+    pointerId: number
+    startX: number
+    startY: number
+    scrollLeft: number
+    scrollTop: number
   } | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const folderInputRef = useRef<HTMLInputElement | null>(null)
@@ -104,6 +137,32 @@ function App() {
   const editedCount = images.filter((image) => image.operations.length > 0).length
   const copy = UI_COPY[language]
   const statusText = getStatusText(copy, status)
+  const effectiveScale = useMemo(() => {
+    const availableWidth = Math.max(1, stageSize.width - STAGE_VIEW_PADDING)
+    const availableHeight = Math.max(1, stageSize.height - STAGE_VIEW_PADDING)
+    const fitWidthScale = availableWidth / Math.max(1, canvasSize.width)
+    const fitHeightScale = availableHeight / Math.max(1, canvasSize.height)
+
+    switch (viewMode) {
+      case 'fit-height':
+        return Math.max(MIN_ZOOM, fitHeightScale)
+      case 'actual':
+        return 1
+      case 'custom':
+        return zoomScale
+      case 'fit-width':
+      default:
+        return Math.max(MIN_ZOOM, fitWidthScale)
+    }
+  }, [canvasSize, stageSize, viewMode, zoomScale])
+  const canvasDisplaySize = useMemo(
+    () => ({
+      width: Math.max(1, Math.round(canvasSize.width * effectiveScale)),
+      height: Math.max(1, Math.round(canvasSize.height * effectiveScale)),
+    }),
+    [canvasSize, effectiveScale],
+  )
+  const zoomPercent = Math.round(effectiveScale * 100)
 
   useEffect(() => {
     saveSettings(settings)
@@ -147,7 +206,7 @@ function App() {
         }
 
         activeImageRef.current = image
-        redrawCanvas(canvasRef.current, image, activeImage.operations)
+        redrawCanvas(canvasRef.current, image, showBefore ? [] : activeImage.operations)
         setCanvasSize({ width: image.naturalWidth, height: image.naturalHeight })
 
         if (activeImage.width !== image.naturalWidth || activeImage.height !== image.naturalHeight) {
@@ -165,7 +224,32 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [activeImage])
+  }, [activeImage, showBefore])
+
+  useEffect(() => {
+    const element = stageRef.current
+    if (!element) {
+      return
+    }
+
+    const updateStageSize = () => {
+      setStageSize({
+        width: element.clientWidth,
+        height: element.clientHeight,
+      })
+    }
+
+    updateStageSize()
+
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', updateStageSize)
+      return () => window.removeEventListener('resize', updateStageSize)
+    }
+
+    const observer = new ResizeObserver(updateStageSize)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
 
   const updateSettings = useCallback((patch: Partial<MosaicSettings>) => {
     setSettings((current) => normalizeSettings({ ...current, ...patch }))
@@ -177,6 +261,55 @@ function App() {
     setStatus({ key: 'settingsSaved' })
   }, [])
 
+  const resetPreviewState = useCallback(() => {
+    drawSessionRef.current = null
+    panSessionRef.current = null
+    setSelection(null)
+    setShowBefore(false)
+  }, [])
+
+  const applyPreset = useCallback(
+    (presetId: MosaicPresetId) => {
+      if (presetId === 'skebPixelate' && !activeImage) {
+        return
+      }
+
+      const preset = getPreset(presetId)
+      if (!preset) {
+        return
+      }
+
+      const longestEdge = Math.max(
+        activeImage?.width ?? canvasSize.width,
+        activeImage?.height ?? canvasSize.height,
+      )
+
+      setSettings((current) =>
+        normalizeSettings({
+          ...current,
+          ...preset.settings({ longestEdge }),
+        }),
+      )
+      setStatus({
+        key: 'presetApplied',
+        preset: copy.settings.presetLabels[presetId],
+      })
+    },
+    [activeImage, canvasSize, copy.settings.presetLabels],
+  )
+
+  const setCustomZoom = useCallback((nextScale: number) => {
+    setViewMode('custom')
+    setZoomScale(clampZoom(nextScale))
+  }, [])
+
+  const zoomBy = useCallback(
+    (offset: number) => {
+      setCustomZoom(effectiveScale + offset)
+    },
+    [effectiveScale, setCustomZoom],
+  )
+
   const clearLoadedImages = useCallback(() => {
     for (const image of imagesRef.current) {
       URL.revokeObjectURL(image.url)
@@ -185,10 +318,14 @@ function App() {
     imagesRef.current = []
     activeImageRef.current = null
     drawSessionRef.current = null
+    panSessionRef.current = null
     setImages([])
     setActiveId(undefined)
     setSelection(null)
     setCanvasSize({ width: 1, height: 1 })
+    setShowBefore(false)
+    setInteractionMode('edit')
+    setViewMode('fit-width')
 
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
@@ -255,11 +392,15 @@ function App() {
         return
       }
 
+      if (options.replace || !activeId) {
+        resetPreviewState()
+      }
+
       setImages((current) => (options.replace ? nextImages : [...current, ...nextImages]))
       setActiveId((current) => (options.replace ? nextImages[0].id : current ?? nextImages[0].id))
       setStatus({ key: 'imagesImported', count: nextImages.length })
     },
-    [clearLoadedImages],
+    [activeId, clearLoadedImages, resetPreviewState],
   )
 
   const undoOperation = useCallback(() => {
@@ -299,9 +440,22 @@ function App() {
       }
 
       const nextIndex = Math.min(images.length - 1, Math.max(0, activeIndex + offset))
+      resetPreviewState()
       setActiveId(images[nextIndex]?.id)
     },
-    [activeIndex, images],
+    [activeIndex, images, resetPreviewState],
+  )
+
+  const selectImageFromList = useCallback(
+    (imageId: string) => {
+      resetPreviewState()
+      setActiveId(imageId)
+
+      if (isMobileImageListViewport()) {
+        setImageListOpen(false)
+      }
+    },
+    [resetPreviewState],
   )
 
   const handlePointerDown = useCallback(
@@ -310,21 +464,47 @@ function App() {
         return
       }
 
+      if (showBefore && interactionMode !== 'pan') {
+        return
+      }
+
       event.currentTarget.setPointerCapture(event.pointerId)
+
+      if (interactionMode === 'pan') {
+        panSessionRef.current = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          scrollLeft: stageRef.current?.scrollLeft ?? 0,
+          scrollTop: stageRef.current?.scrollTop ?? 0,
+        }
+        return
+      }
+
       const point = getCanvasPoint(event, event.currentTarget)
-      drawSessionRef.current = { start: point, last: point }
 
       if (settings.drawTool === 'brush') {
+        const brushBounds = getBrushPointRect(point, settings.brushSize, canvasSize)
+        drawSessionRef.current = { start: point, last: point, brushBounds }
+        setSelection(brushBounds)
         addOperation(createBrushOperation(point, settings))
       } else {
+        drawSessionRef.current = { start: point, last: point }
         setSelection({ x: point.x, y: point.y, width: 0, height: 0 })
       }
     },
-    [activeImage, addOperation, settings],
+    [activeImage, addOperation, canvasSize, interactionMode, settings, showBefore],
   )
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent<HTMLCanvasElement>) => {
+      const panSession = panSessionRef.current
+      if (panSession?.pointerId === event.pointerId && stageRef.current) {
+        stageRef.current.scrollLeft = panSession.scrollLeft - (event.clientX - panSession.startX)
+        stageRef.current.scrollTop = panSession.scrollTop - (event.clientY - panSession.startY)
+        return
+      }
+
       const session = drawSessionRef.current
       if (!session || !canvasRef.current) {
         return
@@ -337,17 +517,31 @@ function App() {
         return
       }
 
+      const pointBounds = getBrushPointRect(point, settings.brushSize, canvasSize)
+      const brushBounds = session.brushBounds
+        ? clampRegion(unionRects(session.brushBounds, pointBounds), canvasSize.width, canvasSize.height)
+        : pointBounds
       const distance = Math.hypot(point.x - session.last.x, point.y - session.last.y)
       if (distance >= settings.brushSize * 0.34) {
         addOperation(createBrushOperation(point, settings))
-        drawSessionRef.current = { ...session, last: point }
+        drawSessionRef.current = { ...session, last: point, brushBounds }
+      } else {
+        drawSessionRef.current = { ...session, brushBounds }
       }
+      setSelection(brushBounds)
     },
-    [addOperation, settings],
+    [addOperation, canvasSize, settings],
   )
 
   const handlePointerUp = useCallback(
     (event: React.PointerEvent<HTMLCanvasElement>) => {
+      const panSession = panSessionRef.current
+      if (panSession?.pointerId === event.pointerId) {
+        panSessionRef.current = null
+        event.currentTarget.releasePointerCapture(event.pointerId)
+        return
+      }
+
       const session = drawSessionRef.current
       if (!session) {
         return
@@ -359,6 +553,11 @@ function App() {
 
       if (settings.drawTool === 'rectangle' && rect.width > 6 && rect.height > 6) {
         addOperation(createRectangleOperation(rect, settings))
+      } else if (settings.drawTool === 'brush') {
+        const distance = Math.hypot(point.x - session.last.x, point.y - session.last.y)
+        if (distance > Math.max(2, settings.brushSize * 0.1)) {
+          addOperation(createBrushOperation(point, settings))
+        }
       }
 
       drawSessionRef.current = null
@@ -415,6 +614,13 @@ function App() {
       height: `${(selection.height / canvasSize.height) * 100}%`,
     }
   }, [canvasSize, selection])
+  const canvasWrapStyle = useMemo(
+    () => ({
+      width: `${canvasDisplaySize.width}px`,
+      height: `${canvasDisplaySize.height}px`,
+    }),
+    [canvasDisplaySize],
+  )
 
   return (
     <div className="app-shell">
@@ -536,7 +742,7 @@ function App() {
                     images.length,
                     image.operations.length > 0,
                   )}
-                  onClick={() => setActiveId(image.id)}
+                  onClick={() => selectImageFromList(image.id)}
                 >
                   <img src={image.url} alt="" />
                 </button>
@@ -548,7 +754,77 @@ function App() {
 
         <section className="canvas-panel" aria-label={copy.editor.label}>
           <div className="canvas-toolbar">
-            <div className="icon-actions">
+            <div className="view-controls" aria-label="preview controls">
+              <div className="icon-actions view-mode-actions">
+                <button
+                  type="button"
+                  className={`icon-button ${viewMode === 'fit-width' ? 'is-active' : ''}`}
+                  title={copy.editor.fitWidth}
+                  aria-pressed={viewMode === 'fit-width'}
+                  disabled={!activeImage}
+                  onClick={() => setViewMode('fit-width')}
+                >
+                  <Columns2 aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={`icon-button ${viewMode === 'fit-height' ? 'is-active' : ''}`}
+                  title={copy.editor.fitHeight}
+                  aria-pressed={viewMode === 'fit-height'}
+                  disabled={!activeImage}
+                  onClick={() => setViewMode('fit-height')}
+                >
+                  <Rows2 aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={`icon-button ${viewMode === 'actual' ? 'is-active' : ''}`}
+                  title={copy.editor.actualSize}
+                  aria-pressed={viewMode === 'actual'}
+                  disabled={!activeImage}
+                  onClick={() => setViewMode('actual')}
+                >
+                  <Maximize2 aria-hidden="true" />
+                </button>
+              </div>
+              <div className="icon-actions zoom-actions">
+                <button
+                  type="button"
+                  className="icon-button"
+                  title={copy.editor.zoomOut}
+                  disabled={!activeImage}
+                  onClick={() => zoomBy(-ZOOM_STEP)}
+                >
+                  <ZoomOut aria-hidden="true" />
+                </button>
+                <span className="zoom-level" aria-label={copy.editor.actualSize}>
+                  {zoomPercent}%
+                </span>
+                <button
+                  type="button"
+                  className="icon-button"
+                  title={copy.editor.zoomIn}
+                  disabled={!activeImage}
+                  onClick={() => zoomBy(ZOOM_STEP)}
+                >
+                  <ZoomIn aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={`icon-button ${interactionMode === 'pan' ? 'is-active' : ''}`}
+                  title={interactionMode === 'pan' ? copy.editor.edit : copy.editor.pan}
+                  aria-pressed={interactionMode === 'pan'}
+                  disabled={!activeImage}
+                  onClick={() =>
+                    setInteractionMode((current) => (current === 'pan' ? 'edit' : 'pan'))
+                  }
+                >
+                  <Move aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            <div className="icon-actions edit-actions">
               <button
                 type="button"
                 className="icon-button"
@@ -566,6 +842,16 @@ function App() {
                 onClick={() => goToImage(1)}
               >
                 <ChevronRight aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className={`icon-button ${showBefore ? 'is-active' : ''}`}
+                title={showBefore ? copy.editor.compareAfter : copy.editor.compareBefore}
+                aria-pressed={showBefore}
+                disabled={!activeImage}
+                onClick={() => setShowBefore((current) => !current)}
+              >
+                <ScanEye aria-hidden="true" />
               </button>
               <button
                 type="button"
@@ -588,9 +874,12 @@ function App() {
             </div>
           </div>
 
-          <div className={`stage ${activeImage ? 'has-image' : ''}`}>
+          <div ref={stageRef} className={`stage ${activeImage ? 'has-image' : ''}`}>
             {activeImage ? (
-              <div className="canvas-wrap">
+              <div
+                className={`canvas-wrap ${interactionMode === 'pan' ? 'is-panning' : ''}`}
+                style={canvasWrapStyle}
+              >
                 <canvas
                   ref={canvasRef}
                   data-testid="mosaic-canvas"
@@ -600,6 +889,7 @@ function App() {
                   onPointerUp={handlePointerUp}
                   onPointerCancel={() => {
                     drawSessionRef.current = null
+                    panSessionRef.current = null
                     setSelection(null)
                   }}
                 />
@@ -617,6 +907,29 @@ function App() {
 
         {settingsOpen && (
           <aside className="settings-panel" aria-label={copy.settings.label}>
+            <div className="settings-row settings-row-presets">
+              <fieldset>
+                <legend>{copy.settings.presets}</legend>
+                <div className="preset-grid">
+                  {MOSAIC_PRESETS.map((preset) => {
+                    const disabled = preset.id === 'skebPixelate' && !activeImage
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        className="preset-button"
+                        disabled={disabled}
+                        title={disabled ? copy.settings.skebNeedsImage : undefined}
+                        onClick={() => applyPreset(preset.id)}
+                      >
+                        {copy.settings.presetLabels[preset.id]}
+                      </button>
+                    )
+                  })}
+                </div>
+              </fieldset>
+            </div>
+
             <div className="settings-row settings-row-modes">
               <fieldset>
                 <legend>{copy.settings.mosaicType}</legend>
@@ -668,7 +981,7 @@ function App() {
                 label={copy.settings.blockSize}
                 value={settings.blockSize}
                 min={4}
-                max={48}
+                max={MAX_BLOCK_SIZE}
                 step={1}
                 suffix="px"
                 onChange={(blockSize) => updateSettings({ blockSize })}
@@ -753,8 +1066,54 @@ function getStatusText(copy: UiCopy, status: StatusState) {
       return copy.status.imagesImported(status.count)
     case 'exportedImages':
       return copy.status.exportedImages(status.count)
+    case 'presetApplied':
+      return copy.status.presetApplied(status.preset)
     default:
       return copy.status[status.key]
+  }
+}
+
+function clampZoom(value: number) {
+  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value))
+}
+
+function isMobileImageListViewport() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  return window.matchMedia?.(MOBILE_IMAGE_LIST_QUERY).matches ?? window.innerWidth <= 640
+}
+
+function getBrushPointRect(
+  point: CanvasPoint,
+  brushSize: number,
+  canvasSize: { width: number; height: number },
+): Rect {
+  const radius = brushSize / 2
+  return clampRegion(
+    {
+      x: point.x - radius,
+      y: point.y - radius,
+      width: brushSize,
+      height: brushSize,
+    },
+    canvasSize.width,
+    canvasSize.height,
+  )
+}
+
+function unionRects(first: Rect, second: Rect): Rect {
+  const x = Math.min(first.x, second.x)
+  const y = Math.min(first.y, second.y)
+  const right = Math.max(first.x + first.width, second.x + second.width)
+  const bottom = Math.max(first.y + first.height, second.y + second.height)
+
+  return {
+    x,
+    y,
+    width: right - x,
+    height: bottom - y,
   }
 }
 

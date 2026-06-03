@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "project": "image-mosaic-effect",
-  "updatedAt": "2026-06-03T12:02:13+09:00",
+  "updatedAt": "2026-06-03T14:12:00+09:00",
   "ratings": {
     "quality": "A-",
     "cost": "A+",
@@ -25,25 +25,37 @@
       "name": "unit-and-build",
       "command": "npm test",
       "status": "passed",
-      "evidence": "Vitest 4 files / 12 tests passed; Vite production build passed."
+      "evidence": "Vitest 5 files / 14 tests passed; Vite production build passed."
     },
     {
       "name": "runtime-gate",
       "command": "npm run test:e2e",
       "status": "passed",
-      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, one-row primary controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, folder import replacement, manual image-list reset, export auto-reset, larger thumbnail-only queue, mobile horizontal settings groups, visible canvas, hidden editor status text, settings toggle, canvas edit, persisted suffix, and ZIP export."
+      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, primary controls, settings reset, hidden queue/settings headings, image-list toggle/reset, folder import replacement, export auto-reset, Fantia/Skeb presets, Before/After preview, brush drag visualization, preview fit/zoom/pan, mobile queue auto-collapse, mobile horizontal settings groups, visible canvas, settings toggle, persisted suffix, and ZIP export."
+    },
+    {
+      "name": "manual-docs",
+      "command": "Review README.md and docs/user-guide.md",
+      "status": "passed",
+      "evidence": "README is user-facing and local-path-free; docs/user-guide.md contains the manual checklist."
     },
     {
       "name": "production-preview",
       "command": "npm run preview -- --port 4176",
       "status": "passed",
-      "evidence": "HTTP 200 for the built dist artifact."
+      "evidence": "HTTP 200 for the built dist artifact at http://127.0.0.1:4176."
     },
     {
       "name": "github-pages-mirror",
       "command": "Copy dist to D:\\AI\\GithubPages\\image-mosaic-effect",
       "status": "passed",
       "evidence": "index.html, favicon.svg, icons.svg, and bundled assets copied."
+    },
+    {
+      "name": "docs-zip",
+      "command": "Compress README.md, governance docs, docs, and Issues",
+      "status": "passed",
+      "evidence": "release/image-mosaic-effect-docs.zip created."
     }
   ]
 }

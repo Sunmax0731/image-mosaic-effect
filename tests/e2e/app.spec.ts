@@ -71,6 +71,15 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
 
   await page.getByTestId('file-input').setInputFiles(sampleFiles())
 
+  const isMobile = await page.evaluate(() => window.innerWidth <= 640)
+  if (isMobile) {
+    await page.locator('.image-row').nth(1).click()
+    await expect(page.locator('.image-list')).toHaveCount(0)
+    await expect(page.getByTestId('mosaic-canvas')).toBeVisible()
+    await page.getByTitle('画像一覧を表示').click()
+    await expect(page.locator('.image-row')).toHaveCount(16)
+  }
+
   await expect(page.getByText('編集中', { exact: true })).toHaveCount(0)
   await expect(page.getByText('範囲を指定してモザイクを適用します')).toHaveCount(0)
   await expect(page.getByText('sample-01.png')).toHaveCount(0)
@@ -78,12 +87,18 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await expect(page.getByTestId('mosaic-canvas')).toBeVisible()
   await expect(page.getByTestId('mosaic-canvas')).toBeInViewport()
 
+  await page.getByRole('button', { name: 'Fantia ピクセル' }).click()
+  await expect(page.getByLabel('ブロックサイズ')).toHaveValue('72')
+  await page.getByRole('button', { name: 'Fantia ぼかし' }).click()
+  await expect(page.getByLabel('ブロックサイズ')).toHaveValue('64')
+  await page.getByRole('button', { name: 'Skeb 1%' }).click()
+  await expect(page.getByLabel('ブロックサイズ')).toHaveValue('4')
+
   const queueScrolls = await page.locator('.image-list').evaluate((element) => {
     return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth
   })
   expect(queueScrolls).toBe(true)
 
-  const isMobile = await page.evaluate(() => window.innerWidth <= 640)
   if (isMobile) {
     const rangeTops = await page
       .locator('.settings-row-ranges > .range-field')
@@ -117,6 +132,16 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await expect(page.getByRole('complementary', { name: 'モザイク設定' })).toBeVisible()
 
   const canvas = page.getByTestId('mosaic-canvas')
+  await page.getByTitle('100%表示').click()
+  await expect(page.getByTitle('100%表示')).toHaveAttribute('aria-pressed', 'true')
+  await page.getByTitle('幅に合わせる').click()
+  await expect(page.getByTitle('幅に合わせる')).toHaveAttribute('aria-pressed', 'true')
+  await page.getByTitle('拡大').click()
+  await expect(page.locator('.zoom-level')).toContainText('%')
+  await page.getByTitle('パン').click()
+  await expect(page.getByTitle('編集')).toHaveAttribute('aria-pressed', 'true')
+  await page.getByTitle('編集').click()
+
   const box = await canvas.boundingBox()
   expect(box).not.toBeNull()
   if (!box) {
@@ -124,14 +149,18 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   }
 
   await canvas.scrollIntoViewIfNeeded()
-  await canvas.click({
-    position: {
-      x: box.width / 2,
-      y: box.height / 2,
-    },
-  })
+  await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.35)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.65, { steps: 5 })
+  await expect(page.locator('.selection')).toBeVisible()
+  await page.mouse.up()
+  await expect(page.locator('.selection')).toHaveCount(0)
 
   await expect(page.getByTitle('元に戻す')).toBeEnabled()
+  await page.getByTitle('Before/After確認').click()
+  await expect(page.getByTitle('After表示に戻す')).toHaveAttribute('aria-pressed', 'true')
+  await page.getByTitle('After表示に戻す').click()
+  await expect(page.getByTitle('Before/After確認')).toHaveAttribute('aria-pressed', 'false')
 
   await page.getByLabel('接尾辞').fill('_checked')
   const downloadPromise = page.waitForEvent('download')

@@ -1,4 +1,5 @@
 import type { DrawTool, MosaicType } from '../types'
+import type { MosaicPresetId } from './presets'
 
 export type Language = 'ja' | 'en'
 
@@ -17,6 +18,7 @@ export interface UiCopy {
     preparingExport: string
     exportFailed: string
     imageListReset: string
+    presetApplied: (name: string) => string
     imagesImported: (count: number) => string
     exportedImages: (count: number) => string
   }
@@ -48,6 +50,15 @@ export interface UiCopy {
     next: string
     undo: string
     reset: string
+    compareBefore: string
+    compareAfter: string
+    fitWidth: string
+    fitHeight: string
+    actualSize: string
+    zoomIn: string
+    zoomOut: string
+    pan: string
+    edit: string
     emptyTitle: string
     emptyBody: string
     canvasLabel: string
@@ -70,6 +81,9 @@ export interface UiCopy {
     originalExtension: string
     png: string
     jpeg: string
+    presets: string
+    presetLabels: Record<MosaicPresetId, string>
+    skebNeedsImage: string
     reset: string
   }
 }
@@ -87,6 +101,7 @@ export const UI_COPY: Record<Language, UiCopy> = {
       preparingExport: 'ZIPを書き出しています',
       exportFailed: '書き出しに失敗しました',
       imageListReset: '画像一覧をリセットしました',
+      presetApplied: (name) => `${name}を適用しました`,
       imagesImported: (count) => `${count}件の画像を読み込みました`,
       exportedImages: (count) => `${count}件の画像を書き出しました`,
     },
@@ -119,6 +134,15 @@ export const UI_COPY: Record<Language, UiCopy> = {
       next: '次の画像',
       undo: '元に戻す',
       reset: 'この画像をリセット',
+      compareBefore: 'Before/After確認',
+      compareAfter: 'After表示に戻す',
+      fitWidth: '幅に合わせる',
+      fitHeight: '高さに合わせる',
+      actualSize: '100%表示',
+      zoomIn: '拡大',
+      zoomOut: '縮小',
+      pan: 'パン',
+      edit: '編集',
       emptyTitle: '画像を読み込む',
       emptyBody: 'このブラウザ内で処理します',
       canvasLabel: '編集キャンバス',
@@ -151,6 +175,13 @@ export const UI_COPY: Record<Language, UiCopy> = {
       originalExtension: '元の拡張子',
       png: 'PNG',
       jpeg: 'JPEG',
+      presets: 'プリセット',
+      presetLabels: {
+        fantiaPixelate: 'Fantia ピクセル',
+        fantiaBlur: 'Fantia ぼかし',
+        skebPixelate: 'Skeb 1%',
+      },
+      skebNeedsImage: 'Skeb 1%は画像読み込み後に使用できます',
       reset: '設定を初期化',
     },
   },
@@ -166,6 +197,7 @@ export const UI_COPY: Record<Language, UiCopy> = {
       preparingExport: 'Preparing ZIP export',
       exportFailed: 'Export failed',
       imageListReset: 'Image list reset',
+      presetApplied: (name) => `${name} applied`,
       imagesImported: (count) => `${count} images imported`,
       exportedImages: (count) => `Exported ${count} images as ZIP`,
     },
@@ -198,6 +230,15 @@ export const UI_COPY: Record<Language, UiCopy> = {
       next: 'Next image',
       undo: 'Undo',
       reset: 'Reset image',
+      compareBefore: 'Before/After preview',
+      compareAfter: 'Return to after preview',
+      fitWidth: 'Fit to width',
+      fitHeight: 'Fit to height',
+      actualSize: '100% view',
+      zoomIn: 'Zoom in',
+      zoomOut: 'Zoom out',
+      pan: 'Pan',
+      edit: 'Edit',
       emptyTitle: 'Import local images',
       emptyBody: 'Files stay in this browser session.',
       canvasLabel: 'Editing canvas',
@@ -230,6 +271,13 @@ export const UI_COPY: Record<Language, UiCopy> = {
       originalExtension: 'Original extension',
       png: 'PNG',
       jpeg: 'JPEG',
+      presets: 'Presets',
+      presetLabels: {
+        fantiaPixelate: 'Fantia pixelate',
+        fantiaBlur: 'Fantia blur',
+        skebPixelate: 'Skeb 1%',
+      },
+      skebNeedsImage: 'Skeb 1% can be used after an image is loaded',
       reset: 'Reset settings',
     },
   },

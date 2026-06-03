@@ -56,3 +56,11 @@ This file is the work contract for `image-mosaic-effect`.
 - [x] Create QCDS evaluation and strict metrics JSON.
 - [x] Build, mirror to `D:\AI\GithubPages\image-mosaic-effect`, and package docs ZIP.
 - [x] Commit and push according to the repository policy.
+
+## Work Items
+- [x] [P2] [Phase:02-specification] Fantia/Skeb向けモザイクプリセット追加 [Issue](Issues/0001-fantia-skeb.md) [QCDS:Quality,Cost,Satisfaction]
+- [x] [P2] [Phase:05-test] Before/After確認ボタンの追加 [Issue](Issues/0002-before-after.md) [QCDS:Quality,Satisfaction]
+- [x] [P2] [Phase:04-implementation] ブラシモザイク中のドラッグ範囲可視化 [Issue](Issues/0003-issue.md) [QCDS:Quality,Satisfaction]
+- [x] [P2] [Phase:04-implementation] モバイル画像選択後の一覧自動折りたたみ [Issue](Issues/0004-issue.md) [QCDS:Quality,Satisfaction]
+- [x] [P2] [Phase:03-design] 画像プレビューの表示倍率操作 [Issue](Issues/0005-issue.md) [QCDS:Quality,Satisfaction]
+- [x] [P2] [Phase:04-implementation] READMEを利用者向けに整備 [Issue](Issues/0006-readme.md) [QCDS:Quality,Satisfaction]

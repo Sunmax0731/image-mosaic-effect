@@ -1,6 +1,8 @@
 import type { DrawTool, ExportFormat, MosaicSettings, MosaicType } from '../types'
 
 export const SETTINGS_KEY = 'image-mosaic-effect.settings.v1'
+export const MIN_BLOCK_SIZE = 4
+export const MAX_BLOCK_SIZE = 512
 
 export const DEFAULT_SETTINGS: MosaicSettings = {
   version: 1,
@@ -46,7 +48,12 @@ export function normalizeSettings(value: unknown): MosaicSettings {
     mosaicType,
     drawTool,
     brushSize: clampNumber(candidate.brushSize, DEFAULT_SETTINGS.brushSize, 16, 220),
-    blockSize: clampNumber(candidate.blockSize, DEFAULT_SETTINGS.blockSize, 4, 48),
+    blockSize: clampNumber(
+      candidate.blockSize,
+      DEFAULT_SETTINGS.blockSize,
+      MIN_BLOCK_SIZE,
+      MAX_BLOCK_SIZE,
+    ),
     strength: clampNumber(candidate.strength, DEFAULT_SETTINGS.strength, 0.1, 1),
     suffix:
       typeof candidate.suffix === 'string' && candidate.suffix.trim()
