@@ -4,6 +4,14 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [x] Keep the active image visible without page-level scrolling after large batch import.
+- [x] Make the queue list scroll inside its panel instead of expanding the whole page.
+- [x] Make `Original extension` the default export format and preserve loaded image extensions where canvas export supports them.
+- [x] Add a settings panel show/hide toggle.
+- [x] Validate the adjusted layout and export behavior.
+
+## Completed Baseline
+
 - [x] Create public GitHub remote `Sunmax0731/image-mosaic-effect`.
 - [x] Scaffold React + Vite static app under `D:\AI\WebApp\image-mosaic-effect`.
 - [x] Create repo governance files: README.md, AGENTS.md, SKILL.md, TODO.md.

@@ -21,13 +21,15 @@ Passed with Playwright 1.60.0.
 
 - App URL: `http://127.0.0.1:5173`
 - `npm run test:e2e`: 2 passed
-  - Desktop Chrome project: import image, draw brush mosaic, persist suffix, export ZIP.
+  - Desktop Chrome project: multi-image import, internal queue scroll, visible canvas, settings toggle, draw brush mosaic, persist suffix, export ZIP.
   - Mobile Chrome project: same scenario at Pixel 7 viewport.
 - Production preview: `http://127.0.0.1:4176` returned HTTP 200 for the built `dist/` artifact.
 - GitHub Pages mirror: `D:\AI\GithubPages\image-mosaic-effect`.
 - Screenshot checks:
   - Desktop empty state: `E:\DevEnv\Temp\User\image-mosaic-effect\desktop.png`
   - Desktop edited state: `E:\DevEnv\Temp\User\image-mosaic-effect\desktop-edited-large.png`
+  - Desktop large-batch layout: `E:\DevEnv\Temp\User\image-mosaic-effect\layout-many-images.png`
+  - Desktop settings hidden: `E:\DevEnv\Temp\User\image-mosaic-effect\layout-settings-hidden.png`
   - Mobile fixed state: `E:\DevEnv\Temp\User\image-mosaic-effect\mobile-fixed.png`
 - Browser plugin note: in-app Browser `iab` was unavailable in this run, so Playwright Chromium was used for the browser gate.
 
@@ -42,5 +44,5 @@ npm run test:e2e
 Results:
 
 - `npm run lint`: passed.
-- `npm test`: Vitest 3 files / 7 tests passed, then production build passed.
+- `npm test`: Vitest 3 files / 10 tests passed, then production build passed.
 - `npm run test:e2e`: Chromium desktop and mobile projects passed.

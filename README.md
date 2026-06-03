@@ -8,6 +8,8 @@ Image Mosaic Effect is a static browser app for importing local image batches, m
 - Edit one image at a time with brush or rectangle mosaic operations.
 - Choose Pixelate, Blur, or Noise mosaic styles.
 - Tune brush size, block size, strength, suffix, and output format.
+- Use the original image extension by default when exporting; PNG and JPEG can be forced.
+- Toggle the settings panel to give the canvas more room.
 - Persist settings in localStorage for the next browser session.
 - Export all loaded images with a suffix in a client-side ZIP.
 

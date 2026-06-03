@@ -10,14 +10,29 @@ test('imports an image, applies a brush operation, persists settings, and export
   await expect(page.getByRole('heading', { name: 'Image Mosaic Effect' })).toBeVisible()
   await expect(page.getByText('No images')).toBeVisible()
 
-  await page.getByTestId('file-input').setInputFiles({
-    name: 'sample.png',
-    mimeType: 'image/png',
-    buffer: Buffer.from(SAMPLE_PNG, 'base64'),
-  })
+  await expect(page.getByLabel('Export format')).toHaveValue('original')
 
-  await expect(page.getByRole('heading', { name: 'sample.png' })).toBeVisible()
+  await page.getByTestId('file-input').setInputFiles(
+    Array.from({ length: 16 }, (_, index) => ({
+      name: `sample-${String(index + 1).padStart(2, '0')}.png`,
+      mimeType: 'image/png',
+      buffer: Buffer.from(SAMPLE_PNG, 'base64'),
+    })),
+  )
+
+  await expect(page.getByRole('heading', { name: 'sample-01.png' })).toBeVisible()
   await expect(page.getByTestId('mosaic-canvas')).toBeVisible()
+  await expect(page.getByTestId('mosaic-canvas')).toBeInViewport()
+
+  const queueScrolls = await page.locator('.image-list').evaluate((element) => {
+    return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth
+  })
+  expect(queueScrolls).toBe(true)
+
+  await page.getByRole('banner').getByTitle('Hide settings').click()
+  await expect(page.getByRole('complementary', { name: 'Mosaic settings' })).toBeHidden()
+  await page.getByRole('banner').getByTitle('Show settings').click()
+  await expect(page.getByRole('complementary', { name: 'Mosaic settings' })).toBeVisible()
 
   const canvas = page.getByTestId('mosaic-canvas')
   const box = await canvas.boundingBox()
@@ -26,10 +41,13 @@ test('imports an image, applies a brush operation, persists settings, and export
     return
   }
 
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await page.mouse.down()
-  await page.mouse.move(box.x + box.width / 2 + 35, box.y + box.height / 2)
-  await page.mouse.up()
+  await canvas.scrollIntoViewIfNeeded()
+  await canvas.click({
+    position: {
+      x: box.width / 2,
+      y: box.height / 2,
+    },
+  })
 
   await expect(page.getByText(/[1-9]\d* ops/)).toBeVisible()
 

@@ -10,13 +10,13 @@ export const DEFAULT_SETTINGS: MosaicSettings = {
   blockSize: 18,
   strength: 0.86,
   suffix: '_mosaic',
-  exportFormat: 'png',
+  exportFormat: 'original',
   jpegQuality: 0.92,
 }
 
 const MOSAIC_TYPES = new Set(['pixelate', 'blur', 'noise'])
 const DRAW_TOOLS = new Set(['brush', 'rectangle'])
-const EXPORT_FORMATS = new Set(['png', 'jpeg'])
+const EXPORT_FORMATS = new Set(['original', 'png', 'jpeg'])
 
 export function clampNumber(value: unknown, fallback: number, min: number, max: number) {
   if (typeof value !== 'number' || Number.isNaN(value)) {

@@ -29,4 +29,11 @@ describe('settings persistence schema', () => {
       jpegQuality: 0.6,
     })
   })
+
+  it('defaults export format to the original loaded image extension', () => {
+    expect(DEFAULT_SETTINGS.exportFormat).toBe('original')
+    expect(normalizeSettings({ exportFormat: 'original' })).toMatchObject({
+      exportFormat: 'original',
+    })
+  })
 })

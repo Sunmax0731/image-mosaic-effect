@@ -4,7 +4,9 @@ export type DrawTool = 'brush' | 'rectangle'
 
 export type MosaicShape = 'circle' | 'rect'
 
-export type ExportFormat = 'png' | 'jpeg'
+export type ExportFormat = 'original' | 'png' | 'jpeg'
+
+export type RenderFormat = 'png' | 'jpeg' | 'webp'
 
 export interface MosaicSettings {
   version: 1

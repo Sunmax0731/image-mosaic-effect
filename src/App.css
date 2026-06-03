@@ -1,7 +1,8 @@
 .app-shell {
-  min-height: 100svh;
+  height: 100svh;
   display: grid;
   grid-template-rows: auto 1fr;
+  overflow: hidden;
   background: var(--app-bg);
   color: var(--text);
 }
@@ -133,14 +134,21 @@ small,
 
 .workspace {
   min-height: 0;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(190px, 240px) minmax(0, 1fr) minmax(240px, 300px);
+  overflow: hidden;
+}
+
+.workspace.settings-collapsed {
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
 }
 
 .queue-panel,
 .settings-panel,
 .canvas-panel {
   min-height: 0;
+  overflow: hidden;
 }
 
 .queue-panel,
@@ -178,7 +186,9 @@ small,
   flex: 1;
   flex-direction: column;
   gap: 8px;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .image-row {
@@ -276,10 +286,16 @@ small,
   overflow: auto;
 }
 
+.stage.has-image {
+  align-items: start;
+  justify-items: center;
+  align-content: start;
+}
+
 .canvas-wrap {
   position: relative;
   max-width: min(100%, 980px);
-  max-height: 100%;
+  max-height: calc(100svh - 190px);
   display: grid;
   border: 1px solid rgba(15, 23, 42, 0.16);
   border-radius: 8px;
@@ -456,7 +472,12 @@ input[type='range'] {
 
   .workspace {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(520px, 1fr) auto;
+    grid-template-rows: minmax(110px, 150px) minmax(300px, 1fr) auto;
+  }
+
+  .workspace.settings-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(110px, 150px) minmax(300px, 1fr);
   }
 
   .queue-panel,
@@ -467,12 +488,16 @@ input[type='range'] {
 
   .settings-panel {
     border-top: 1px solid var(--line);
+    max-height: 220px;
+    overflow-y: auto;
   }
 
   .image-list {
     flex-direction: row;
+    overflow-y: hidden;
     overflow-x: auto;
     padding-bottom: 4px;
+    padding-right: 0;
   }
 
   .image-row {

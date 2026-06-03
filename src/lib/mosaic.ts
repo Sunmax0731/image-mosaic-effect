@@ -1,8 +1,8 @@
 import type {
   CanvasPoint,
-  ExportFormat,
   MosaicOperation,
   MosaicSettings,
+  RenderFormat,
 } from '../types'
 
 export interface Rect {
@@ -124,14 +124,14 @@ export function redrawCanvas(
 export async function renderImageBlob(
   url: string,
   operations: MosaicOperation[],
-  format: ExportFormat,
+  format: RenderFormat,
   jpegQuality: number,
 ) {
   const image = await loadImageElement(url)
   const canvas = document.createElement('canvas')
   redrawCanvas(canvas, image, operations)
 
-  const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png'
+  const mimeType = getMimeType(format)
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -145,6 +145,18 @@ export async function renderImageBlob(
       jpegQuality,
     )
   })
+}
+
+function getMimeType(format: RenderFormat) {
+  switch (format) {
+    case 'jpeg':
+      return 'image/jpeg'
+    case 'webp':
+      return 'image/webp'
+    case 'png':
+    default:
+      return 'image/png'
+  }
 }
 
 export function applyMosaicOperation(

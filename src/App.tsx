@@ -12,11 +12,12 @@ import {
   SlidersHorizontal,
   SquareDashedMousePointer,
   Undo2,
+  X,
 } from 'lucide-react'
 import './App.css'
 import {
-  appendSuffixToFileName,
   readableBytes,
+  resolveExportTarget,
 } from './lib/fileNames'
 import {
   createBrushOperation,
@@ -56,6 +57,7 @@ function App() {
   const [selection, setSelection] = useState<Rect | null>(null)
   const [canvasSize, setCanvasSize] = useState({ width: 1, height: 1 })
   const [isExporting, setIsExporting] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(true)
   const [status, setStatus] = useState('Settings saved locally')
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -295,16 +297,19 @@ function App() {
     try {
       const zip = new JSZip()
       for (const image of images) {
+        const exportTarget = resolveExportTarget(
+          image.name,
+          image.type,
+          settings.suffix,
+          settings.exportFormat,
+        )
         const blob = await renderImageBlob(
           image.url,
           image.operations,
-          settings.exportFormat,
+          exportTarget.format,
           settings.jpegQuality,
         )
-        zip.file(
-          appendSuffixToFileName(image.name, settings.suffix, settings.exportFormat),
-          blob,
-        )
+        zip.file(exportTarget.fileName, blob)
       }
 
       const archive = await zip.generateAsync({ type: 'blob' })
@@ -359,6 +364,15 @@ function App() {
             <Download aria-hidden="true" />
             {isExporting ? 'Exporting' : 'Export all'}
           </button>
+          <button
+            type="button"
+            className="icon-button settings-toggle"
+            title={settingsOpen ? 'Hide settings' : 'Show settings'}
+            aria-pressed={settingsOpen}
+            onClick={() => setSettingsOpen((current) => !current)}
+          >
+            <SlidersHorizontal aria-hidden="true" />
+          </button>
         </div>
 
         <input
@@ -382,7 +396,7 @@ function App() {
         />
       </header>
 
-      <main className="workspace">
+      <main className={`workspace ${settingsOpen ? '' : 'settings-collapsed'}`}>
         <aside className="queue-panel" aria-label="Image queue">
           <div className="panel-header">
             <div>
@@ -498,7 +512,7 @@ function App() {
           </footer>
         </section>
 
-        <aside className="settings-panel" aria-label="Mosaic settings">
+        {settingsOpen && <aside className="settings-panel" aria-label="Mosaic settings">
           <div className="panel-header">
             <div>
               <h2>Settings</h2>
@@ -506,7 +520,14 @@ function App() {
                 <Save aria-hidden="true" /> Persisted
               </p>
             </div>
-            <SlidersHorizontal aria-hidden="true" />
+            <button
+              type="button"
+              className="icon-button"
+              title="Hide settings"
+              onClick={() => setSettingsOpen(false)}
+            >
+              <X aria-hidden="true" />
+            </button>
           </div>
 
           <fieldset>
@@ -587,6 +608,7 @@ function App() {
                 updateSettings({ exportFormat: event.currentTarget.value as ExportFormat })
               }
             >
+              <option value="original">Original extension</option>
               <option value="png">PNG</option>
               <option value="jpeg">JPEG</option>
             </select>
@@ -602,7 +624,7 @@ function App() {
           >
             Reset settings
           </button>
-        </aside>
+        </aside>}
       </main>
     </div>
   )
