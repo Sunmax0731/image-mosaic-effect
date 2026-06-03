@@ -4,6 +4,7 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [x] [P2] [Phase:04-implementation] ブラシ処理範囲を円形カーソル表示に変更 [Issue](Issues/0009-brush-circle-cursor.md) [QCDS:Quality,Satisfaction]
 - [x] [P2] [Phase:04-implementation] Fantia/Skebプリセットの公式ロゴと短縮表示へ差し替え [Issue](Issues/0008-official-preset-logos.md) [QCDS:Quality,Satisfaction]
 - [x] [P2] [Phase:04-implementation] Fantia/Skebプリセットにロゴを表示 [Issue](Issues/0007-preset-logos.md) [QCDS:Quality,Satisfaction]
 

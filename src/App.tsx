@@ -33,7 +33,6 @@ import {
   type UiCopy,
 } from './lib/i18n'
 import {
-  clampRegion,
   createBrushOperation,
   createRectangleOperation,
   getCanvasPoint,
@@ -80,6 +79,10 @@ const PRESET_LOGOS: Record<MosaicPresetId, string> = {
 
 type ViewMode = 'fit-width' | 'fit-height' | 'actual' | 'custom'
 type InteractionMode = 'edit' | 'pan'
+type SelectionOverlay = {
+  shape: 'rect' | 'circle'
+  rect: Rect
+}
 
 type StatusState =
   | { key: 'settingsSaved' }
@@ -108,7 +111,7 @@ function App() {
   const [settings, setSettings] = useState<MosaicSettings>(() => loadSettings())
   const [images, setImages] = useState<ImageEntry[]>([])
   const [activeId, setActiveId] = useState<string>()
-  const [selection, setSelection] = useState<Rect | null>(null)
+  const [selection, setSelection] = useState<SelectionOverlay | null>(null)
   const [canvasSize, setCanvasSize] = useState({ width: 1, height: 1 })
   const [isExporting, setIsExporting] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(true)
@@ -127,7 +130,6 @@ function App() {
   const drawSessionRef = useRef<{
     start: CanvasPoint
     last: CanvasPoint
-    brushBounds?: Rect
   } | null>(null)
   const panSessionRef = useRef<{
     pointerId: number
@@ -491,16 +493,19 @@ function App() {
       const point = getCanvasPoint(event, event.currentTarget)
 
       if (settings.drawTool === 'brush') {
-        const brushBounds = getBrushPointRect(point, settings.brushSize, canvasSize)
-        drawSessionRef.current = { start: point, last: point, brushBounds }
-        setSelection(brushBounds)
+        const brushRect = getBrushPointRect(point, settings.brushSize)
+        drawSessionRef.current = { start: point, last: point }
+        setSelection({ shape: 'circle', rect: brushRect })
         addOperation(createBrushOperation(point, settings))
       } else {
         drawSessionRef.current = { start: point, last: point }
-        setSelection({ x: point.x, y: point.y, width: 0, height: 0 })
+        setSelection({
+          shape: 'rect',
+          rect: { x: point.x, y: point.y, width: 0, height: 0 },
+        })
       }
     },
-    [activeImage, addOperation, canvasSize, interactionMode, settings, showBefore],
+    [activeImage, addOperation, interactionMode, settings, showBefore],
   )
 
   const handlePointerMove = useCallback(
@@ -520,24 +525,19 @@ function App() {
       const point = getCanvasPoint(event, event.currentTarget)
 
       if (settings.drawTool === 'rectangle') {
-        setSelection(normalizeRectangle(session.start, point))
+        setSelection({ shape: 'rect', rect: normalizeRectangle(session.start, point) })
         return
       }
 
-      const pointBounds = getBrushPointRect(point, settings.brushSize, canvasSize)
-      const brushBounds = session.brushBounds
-        ? clampRegion(unionRects(session.brushBounds, pointBounds), canvasSize.width, canvasSize.height)
-        : pointBounds
+      const brushRect = getBrushPointRect(point, settings.brushSize)
       const distance = Math.hypot(point.x - session.last.x, point.y - session.last.y)
       if (distance >= settings.brushSize * 0.34) {
         addOperation(createBrushOperation(point, settings))
-        drawSessionRef.current = { ...session, last: point, brushBounds }
-      } else {
-        drawSessionRef.current = { ...session, brushBounds }
+        drawSessionRef.current = { ...session, last: point }
       }
-      setSelection(brushBounds)
+      setSelection({ shape: 'circle', rect: brushRect })
     },
-    [addOperation, canvasSize, settings],
+    [addOperation, settings],
   )
 
   const handlePointerUp = useCallback(
@@ -615,10 +615,10 @@ function App() {
     }
 
     return {
-      left: `${(selection.x / canvasSize.width) * 100}%`,
-      top: `${(selection.y / canvasSize.height) * 100}%`,
-      width: `${(selection.width / canvasSize.width) * 100}%`,
-      height: `${(selection.height / canvasSize.height) * 100}%`,
+      left: `${(selection.rect.x / canvasSize.width) * 100}%`,
+      top: `${(selection.rect.y / canvasSize.height) * 100}%`,
+      width: `${(selection.rect.width / canvasSize.width) * 100}%`,
+      height: `${(selection.rect.height / canvasSize.height) * 100}%`,
     }
   }, [canvasSize, selection])
   const canvasWrapStyle = useMemo(
@@ -900,7 +900,9 @@ function App() {
                     setSelection(null)
                   }}
                 />
-                {selectionStyle && <div className="selection" style={selectionStyle} />}
+                {selection && selectionStyle && (
+                  <div className={`selection is-${selection.shape}`} style={selectionStyle} />
+                )}
               </div>
             ) : (
               <div className="empty-stage">
@@ -1104,35 +1106,13 @@ function isMobileImageListViewport() {
   return window.matchMedia?.(MOBILE_IMAGE_LIST_QUERY).matches ?? window.innerWidth <= 640
 }
 
-function getBrushPointRect(
-  point: CanvasPoint,
-  brushSize: number,
-  canvasSize: { width: number; height: number },
-): Rect {
+function getBrushPointRect(point: CanvasPoint, brushSize: number): Rect {
   const radius = brushSize / 2
-  return clampRegion(
-    {
-      x: point.x - radius,
-      y: point.y - radius,
-      width: brushSize,
-      height: brushSize,
-    },
-    canvasSize.width,
-    canvasSize.height,
-  )
-}
-
-function unionRects(first: Rect, second: Rect): Rect {
-  const x = Math.min(first.x, second.x)
-  const y = Math.min(first.y, second.y)
-  const right = Math.max(first.x + first.width, second.x + second.width)
-  const bottom = Math.max(first.y + first.height, second.y + second.height)
-
   return {
-    x,
-    y,
-    width: right - x,
-    height: bottom - y,
+    x: point.x - radius,
+    y: point.y - radius,
+    width: brushSize,
+    height: brushSize,
   }
 }
 

@@ -369,6 +369,16 @@ canvas {
   pointer-events: none;
 }
 
+.selection.is-rect {
+  border-radius: 0;
+}
+
+.selection.is-circle {
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.12);
+  box-shadow: 0 0 0 1px rgba(17, 24, 39, 0.2);
+}
+
 .empty-stage {
   width: min(420px, 100%);
   min-height: 260px;

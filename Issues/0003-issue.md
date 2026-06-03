@@ -22,8 +22,8 @@
 
 ## Notes
 
-- Brush drags now show the clamped bounding rectangle for the brush stamp path while pointer input is active.
-- The same selection overlay is reused for rectangle drags, and Playwright validates the overlay during mouse drag.
+- Initial implementation showed the clamped bounding rectangle for the brush stamp path while pointer input was active.
+- Follow-up [0009](0009-brush-circle-cursor.md) replaces that rectangle-like brush feedback with a circular brush cursor while keeping the rectangle overlay for the rectangle tool.
 - Evidence: `npm run lint`, `npm test`, and `npm run test:e2e` passed on 2026-06-03.
 
 ## Codex Sessions

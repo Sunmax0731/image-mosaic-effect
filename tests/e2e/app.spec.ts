@@ -159,7 +159,19 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.35)
   await page.mouse.down()
   await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.65, { steps: 5 })
-  await expect(page.locator('.selection')).toBeVisible()
+  const brushCursor = page.locator('.selection.is-circle')
+  await expect(brushCursor).toBeVisible()
+  const brushCursorStyle = await brushCursor.evaluate((element) => {
+    const style = window.getComputedStyle(element)
+    const rect = element.getBoundingClientRect()
+    return {
+      borderRadius: style.borderRadius,
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    }
+  })
+  expect(brushCursorStyle.borderRadius).not.toBe('0px')
+  expect(Math.abs(brushCursorStyle.width - brushCursorStyle.height)).toBeLessThanOrEqual(2)
   await page.mouse.up()
   await expect(page.locator('.selection')).toHaveCount(0)
 

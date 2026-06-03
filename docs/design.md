@@ -34,7 +34,7 @@ The primary user is doing repeated manual review on a smartphone or desktop brow
 - Fantia presets display the official square logo from `https://help.fantia.jp/wp-content/uploads/2019/01/fantia-square-logo.png` with only `ピクセル` / `ぼかし` visible labels, then apply strong pixelate or blur settings based on the local reference attachments in `Issues/assets/0001-fantia-skeb/`. Skeb 1% displays the user-provided SVG logo only, with no visible text label, and computes `ceil(longEdge * 0.01)` for the pixel block size, with a minimum of 4 px.
 - Before/After is a preview-only state: it redraws the active canvas from the original image while preserving the current operation list.
 - Preview fit, 100%, zoom, and pan affect only CSS display size and scroll position; canvas pixels, edit coordinates, and export output remain tied to the original image dimensions.
-- Brush drags show the clamped bounding rectangle of the brush stamp path while the operation is in progress.
+- Brush drags show the current brush footprint as a circular cursor while the operation is in progress; rectangle drags keep the rectangular range overlay.
 - No server or upload affordance because local privacy is part of the product contract.
 
 ## Responsive Behavior

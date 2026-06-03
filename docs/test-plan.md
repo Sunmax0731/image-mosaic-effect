@@ -8,7 +8,7 @@
   - Vitest unit tests for settings schema, file names, mosaic geometry, i18n, and preset sizing.
   - TypeScript build and Vite production build.
 - `npm run test:e2e`
-  - Playwright Chromium checks for Japanese default UI, internal language switching API, nonblank render, one-row primary import/export controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, image-list reset, folder import list replacement, auto list reset after export, multi-image import, official Fantia logo presets with shortened visible labels, icon-only Skeb preset, Before/After toggle, brush drag range visualization, preview fit/zoom/pan controls, mobile auto-collapse after queue selection, larger thumbnail-only queue, internal queue scrolling, visible canvas position, mobile horizontal settings groups, single-button settings panel toggle, hidden editor status text, canvas edit, settings persistence, and ZIP export.
+  - Playwright Chromium checks for Japanese default UI, internal language switching API, nonblank render, one-row primary import/export controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, image-list reset, folder import list replacement, auto list reset after export, multi-image import, official Fantia logo presets with shortened visible labels, icon-only Skeb preset, Before/After toggle, circular brush cursor visualization, preview fit/zoom/pan controls, mobile auto-collapse after queue selection, larger thumbnail-only queue, internal queue scrolling, visible canvas position, mobile horizontal settings groups, single-button settings panel toggle, hidden editor status text, canvas edit, settings persistence, and ZIP export.
   - Desktop Chrome and mobile Chrome projects are configured.
 
 ## Runtime Gate
@@ -29,7 +29,7 @@ Platform gate for WebApp:
 12. Confirm the active image is visible in the canvas area without filename, dimension, editor-state, instruction, or bottom status text.
 13. On smartphone width, confirm mosaic/tool, brush/block/strength, and suffix/export format groups each stay on one row without settings-panel scrolling.
 14. Confirm Fantia pixelate and Fantia blur show the official Fantia logo with only `ピクセル` / `ぼかし` visible, and Skeb 1% shows only the Skeb logo while all presets switch the relevant settings.
-15. Confirm brush and rectangle drag operations display a visible range while dragging.
+15. Confirm brush drag operations display a circular cursor for the current brush footprint, and rectangle drags display a rectangular range while dragging.
 16. Confirm Before/After toggles original and edited preview without removing operations.
 17. Confirm fit-to-width, fit-to-height, 100%, zoom in/out, and pan change the preview only.
 18. On smartphone width, select a thumbnail and confirm the image list collapses automatically, then can be reopened.
