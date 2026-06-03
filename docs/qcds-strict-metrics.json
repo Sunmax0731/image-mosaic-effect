@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "project": "image-mosaic-effect",
+  "updatedAt": "2026-06-03T10:00:44+09:00",
+  "ratings": {
+    "quality": "A-",
+    "cost": "A+",
+    "delivery": "A-",
+    "satisfaction": "A-"
+  },
+  "allowedRatings": ["S+", "S-", "A+", "A-", "B+", "B-", "C+", "C-", "D+", "D-"],
+  "runtimeGate": {
+    "status": "passed",
+    "requirement": "Chrome or headless browser renders nonblank UI, major elements, and major operations.",
+    "method": "Playwright Chromium desktop and mobile projects",
+    "browserPluginStatus": "iab unavailable; Playwright fallback used"
+  },
+  "checks": [
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "status": "passed"
+    },
+    {
+      "name": "unit-and-build",
+      "command": "npm test",
+      "status": "passed",
+      "evidence": "Vitest 3 files / 7 tests passed; Vite production build passed."
+    },
+    {
+      "name": "runtime-gate",
+      "command": "npm run test:e2e",
+      "status": "passed",
+      "evidence": "2 Playwright projects passed: chromium and mobile-chrome."
+    },
+    {
+      "name": "production-preview",
+      "command": "npm run preview -- --port 4176",
+      "status": "passed",
+      "evidence": "HTTP 200 for the built dist artifact."
+    },
+    {
+      "name": "github-pages-mirror",
+      "command": "Copy dist to D:\\AI\\GithubPages\\image-mosaic-effect",
+      "status": "passed",
+      "evidence": "index.html, favicon.svg, icons.svg, and bundled assets copied."
+    }
+  ]
+}
