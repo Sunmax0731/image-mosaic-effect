@@ -83,6 +83,7 @@ export interface UiCopy {
     jpeg: string
     presets: string
     presetLabels: Record<MosaicPresetId, string>
+    presetVisibleLabels: Record<MosaicPresetId, string>
     skebNeedsImage: string
     reset: string
   }
@@ -181,6 +182,11 @@ export const UI_COPY: Record<Language, UiCopy> = {
         fantiaBlur: 'Fantia ぼかし',
         skebPixelate: 'Skeb 1%',
       },
+      presetVisibleLabels: {
+        fantiaPixelate: 'ピクセル',
+        fantiaBlur: 'ぼかし',
+        skebPixelate: '',
+      },
       skebNeedsImage: 'Skeb 1%は画像読み込み後に使用できます',
       reset: '設定を初期化',
     },
@@ -276,6 +282,11 @@ export const UI_COPY: Record<Language, UiCopy> = {
         fantiaPixelate: 'Fantia pixelate',
         fantiaBlur: 'Fantia blur',
         skebPixelate: 'Skeb 1%',
+      },
+      presetVisibleLabels: {
+        fantiaPixelate: 'Pixelate',
+        fantiaBlur: 'Blur',
+        skebPixelate: '',
       },
       skebNeedsImage: 'Skeb 1% can be used after an image is loaded',
       reset: 'Reset settings',

@@ -51,7 +51,7 @@ import {
   normalizeSettings,
   saveSettings,
 } from './lib/settings'
-import fantiaLogoUrl from './assets/fantia-logo.svg'
+import fantiaLogoUrl from './assets/fantia-square-logo.png'
 import skebLogoUrl from './assets/skeb-logo.svg'
 import type {
   CanvasPoint,
@@ -925,6 +925,8 @@ function App() {
                         key={preset.id}
                         type="button"
                         className="preset-button"
+                        data-preset-id={preset.id}
+                        aria-label={copy.settings.presetLabels[preset.id]}
                         disabled={disabled}
                         title={disabled ? copy.settings.skebNeedsImage : undefined}
                         onClick={() => applyPreset(preset.id)}
@@ -935,7 +937,11 @@ function App() {
                           alt=""
                           aria-hidden="true"
                         />
-                        <span className="preset-label">{copy.settings.presetLabels[preset.id]}</span>
+                        {copy.settings.presetVisibleLabels[preset.id] && (
+                          <span className="preset-label">
+                            {copy.settings.presetVisibleLabels[preset.id]}
+                          </span>
+                        )}
                       </button>
                     )
                   })}

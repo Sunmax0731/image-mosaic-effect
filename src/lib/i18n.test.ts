@@ -15,6 +15,8 @@ describe('i18n', () => {
     expect(UI_COPY.ja.status.imageListReset).toBe('画像一覧をリセットしました')
     expect(UI_COPY.ja.editor.fitWidth).toBe('幅に合わせる')
     expect(UI_COPY.ja.settings.presetLabels.skebPixelate).toBe('Skeb 1%')
+    expect(UI_COPY.ja.settings.presetVisibleLabels.fantiaPixelate).toBe('ピクセル')
+    expect(UI_COPY.ja.settings.presetVisibleLabels.skebPixelate).toBe('')
   })
 
   it('keeps English copy available for future language controls', () => {

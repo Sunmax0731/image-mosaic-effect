@@ -88,8 +88,12 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await expect(page.getByTestId('mosaic-canvas')).toBeInViewport()
 
   await expect(page.locator('.preset-logo')).toHaveCount(3)
+  await expect(page.locator('.preset-label')).toHaveText(['ピクセル', 'ぼかし'])
+  await expect(page.getByText('Fantia ピクセル', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('Skeb 1%', { exact: true })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Fantia ピクセル' }).locator('.preset-logo')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Skeb 1%' }).locator('.preset-logo')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Skeb 1%' }).locator('.preset-label')).toHaveCount(0)
   await page.getByRole('button', { name: 'Fantia ピクセル' }).click()
   await expect(page.getByLabel('ブロックサイズ')).toHaveValue('72')
   await page.getByRole('button', { name: 'Fantia ぼかし' }).click()

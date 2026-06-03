@@ -23,6 +23,6 @@
 
 ## Notes
 
-- Implemented `src/assets/fantia-logo.svg` and `src/assets/skeb-logo.svg`.
+- Initial logo assets were implemented here; exact official/source-provided logo replacement is tracked in [0008](0008-official-preset-logos.md).
 - Preset buttons render the logo image with an empty alt and retain visible text labels for accessibility.
 - Evidence: `npm run lint`, `npm test`, and `npm run test:e2e` passed on 2026-06-03.

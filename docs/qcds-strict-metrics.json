@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "project": "image-mosaic-effect",
-  "updatedAt": "2026-06-03T14:30:00+09:00",
+  "updatedAt": "2026-06-03T14:35:00+09:00",
   "ratings": {
     "quality": "A-",
     "cost": "A+",
@@ -31,7 +31,7 @@
       "name": "runtime-gate",
       "command": "npm run test:e2e",
       "status": "passed",
-      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, primary controls, settings reset, hidden queue/settings headings, image-list toggle/reset, folder import replacement, export auto-reset, Fantia/Skeb logo-backed presets, Before/After preview, brush drag visualization, preview fit/zoom/pan, mobile queue auto-collapse, mobile horizontal settings groups, visible canvas, settings toggle, persisted suffix, and ZIP export."
+      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, primary controls, settings reset, hidden queue/settings headings, image-list toggle/reset, folder import replacement, export auto-reset, official-logo Fantia presets with shortened visible labels, icon-only Skeb preset, Before/After preview, brush drag visualization, preview fit/zoom/pan, mobile queue auto-collapse, mobile horizontal settings groups, visible canvas, settings toggle, persisted suffix, and ZIP export."
     },
     {
       "name": "manual-docs",

@@ -4,6 +4,7 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [x] [P2] [Phase:04-implementation] Fantia/Skebプリセットの公式ロゴと短縮表示へ差し替え [Issue](Issues/0008-official-preset-logos.md) [QCDS:Quality,Satisfaction]
 - [x] [P2] [Phase:04-implementation] Fantia/Skebプリセットにロゴを表示 [Issue](Issues/0007-preset-logos.md) [QCDS:Quality,Satisfaction]
 
 - [x] Remove visible `画像一覧` and `設定` section heading text.
