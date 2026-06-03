@@ -4,6 +4,14 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [x] Add a loaded-image list reset action.
+- [x] Clear the loaded-image list automatically after successful batch export.
+- [x] Compress mobile settings into horizontal groups for mosaic/tool, ranges, and suffix/export format.
+- [x] Increase the mobile image-list thumbnail area so thumbnails are not clipped.
+- [x] Validate list reset, export reset, compact mobile settings, and larger thumbnails with lint, tests, e2e, and screenshots.
+
+## Completed Compact Chrome Iteration
+
 - [x] Move the settings reset action next to the settings show/hide toggle in the top toolbar.
 - [x] Keep import files, import folder, and export all on one row across mobile widths.
 - [x] Remove editor header status/instruction text and the bottom progress/tool status bar.

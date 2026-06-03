@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "project": "image-mosaic-effect",
-  "updatedAt": "2026-06-03T11:12:52+09:00",
+  "updatedAt": "2026-06-03T11:32:44+09:00",
   "ratings": {
     "quality": "A-",
     "cost": "A+",
@@ -31,7 +31,7 @@
       "name": "runtime-gate",
       "command": "npm run test:e2e",
       "status": "passed",
-      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, one-row primary controls, top-toolbar settings reset, compact settings header, thumbnail-only queue, queue scroll, visible canvas, hidden editor status text, settings toggle, canvas edit, persisted suffix, and ZIP export."
+      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, one-row primary controls, top-toolbar settings reset, compact settings header, manual image-list reset, export auto-reset, larger thumbnail-only queue, mobile horizontal settings groups, visible canvas, hidden editor status text, settings toggle, canvas edit, persisted suffix, and ZIP export."
     },
     {
       "name": "production-preview",

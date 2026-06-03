@@ -16,6 +16,7 @@ export interface UiCopy {
     currentImageReset: string
     preparingExport: string
     exportFailed: string
+    imageListReset: string
     imagesImported: (count: number) => string
     exportedImages: (count: number) => string
   }
@@ -31,6 +32,7 @@ export interface UiCopy {
     label: string
     title: string
     count: (edited: number, total: number) => string
+    reset: string
     empty: string
     thumbnailLabel: (index: number, total: number, edited: boolean) => string
   }
@@ -82,6 +84,7 @@ export const UI_COPY: Record<Language, UiCopy> = {
       currentImageReset: '現在の画像をリセットしました',
       preparingExport: 'ZIPを書き出しています',
       exportFailed: '書き出しに失敗しました',
+      imageListReset: '画像一覧をリセットしました',
       imagesImported: (count) => `${count}件の画像を読み込みました`,
       exportedImages: (count) => `${count}件の画像を書き出しました`,
     },
@@ -97,6 +100,7 @@ export const UI_COPY: Record<Language, UiCopy> = {
       label: '画像一覧',
       title: '画像一覧',
       count: (edited, total) => `${edited}/${total} 加工済み`,
+      reset: 'リストをリセット',
       empty: '画像なし',
       thumbnailLabel: (index, total, edited) =>
         `${index} / ${total}${edited ? '、加工済み' : ''}`,
@@ -157,6 +161,7 @@ export const UI_COPY: Record<Language, UiCopy> = {
       currentImageReset: 'Current image reset',
       preparingExport: 'Preparing ZIP export',
       exportFailed: 'Export failed',
+      imageListReset: 'Image list reset',
       imagesImported: (count) => `${count} images imported`,
       exportedImages: (count) => `Exported ${count} images as ZIP`,
     },
@@ -172,6 +177,7 @@ export const UI_COPY: Record<Language, UiCopy> = {
       label: 'Image queue',
       title: 'Queue',
       count: (edited, total) => `${edited}/${total} edited`,
+      reset: 'Reset list',
       empty: 'No images',
       thumbnailLabel: (index, total, edited) =>
         `${index} / ${total}${edited ? ', edited' : ''}`,

@@ -395,6 +395,12 @@ legend,
   gap: 8px;
 }
 
+.settings-row {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+
 .range-field > span {
   display: flex;
   align-items: center;
@@ -458,12 +464,12 @@ input[type='range'] {
 
   .workspace {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(110px, 150px) minmax(300px, 1fr) auto;
+    grid-template-rows: minmax(180px, 220px) minmax(240px, 1fr) auto;
   }
 
   .workspace.settings-collapsed {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(110px, 150px) minmax(300px, 1fr);
+    grid-template-rows: minmax(180px, 220px) minmax(300px, 1fr);
   }
 
   .queue-panel,
@@ -487,13 +493,13 @@ input[type='range'] {
   }
 
   .image-row {
-    width: 132px;
-    flex: 0 0 132px;
+    width: 168px;
+    flex: 0 0 168px;
   }
 
   .empty-list {
-    width: 132px;
-    flex: 0 0 132px;
+    width: 168px;
+    flex: 0 0 168px;
   }
 }
 
@@ -509,6 +515,14 @@ input[type='range'] {
   .topbar-actions {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace {
+    grid-template-rows: minmax(180px, 210px) minmax(120px, 1fr) auto;
+  }
+
+  .workspace.settings-collapsed {
+    grid-template-rows: minmax(180px, 210px) minmax(280px, 1fr);
   }
 
   .button {
@@ -529,6 +543,10 @@ input[type='range'] {
     padding: 12px;
   }
 
+  .queue-panel {
+    gap: 10px;
+  }
+
   .canvas-toolbar {
     align-items: flex-start;
     flex-direction: column;
@@ -540,7 +558,7 @@ input[type='range'] {
     justify-content: space-between;
   }
 
-  .icon-button {
+  .icon-actions .icon-button {
     flex: 1;
   }
 
@@ -548,4 +566,82 @@ input[type='range'] {
     max-height: calc(100svh - 210px);
   }
 
+  .settings-panel {
+    gap: 7px;
+    max-height: none;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .settings-row {
+    gap: 6px;
+  }
+
+  .settings-row-modes {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+
+  .settings-row-ranges {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .settings-row-output {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  }
+
+  fieldset,
+  .range-field,
+  .field {
+    gap: 4px;
+  }
+
+  legend,
+  .field span,
+  .range-field > span {
+    font-size: 11px;
+  }
+
+  .segmented {
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .segmented button {
+    min-height: 26px;
+    padding: 0 3px;
+    font-size: 11px;
+  }
+
+  .tool-grid {
+    gap: 5px;
+  }
+
+  .tool-button {
+    min-height: 30px;
+    gap: 4px;
+    padding: 0 4px;
+    font-size: 11px;
+  }
+
+  .range-field > span {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+
+  .range-field strong {
+    font-size: 10px;
+  }
+
+  input,
+  select {
+    min-height: 30px;
+    padding: 0 7px;
+    font-size: 12px;
+  }
+
+  input[type='range'] {
+    min-height: 18px;
+  }
 }

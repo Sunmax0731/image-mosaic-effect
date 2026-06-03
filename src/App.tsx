@@ -10,6 +10,7 @@ import {
   RotateCcw,
   SlidersHorizontal,
   SquareDashedMousePointer,
+  Trash2,
   Undo2,
 } from 'lucide-react'
 import './App.css'
@@ -61,6 +62,7 @@ type StatusState =
   | { key: 'currentImageReset' }
   | { key: 'preparingExport' }
   | { key: 'exportFailed' }
+  | { key: 'imageListReset' }
   | { key: 'imagesImported'; count: number }
   | { key: 'exportedImages'; count: number }
 
@@ -170,6 +172,28 @@ function App() {
   const resetSettings = useCallback(() => {
     setSettings(DEFAULT_SETTINGS)
     setStatus({ key: 'settingsSaved' })
+  }, [])
+
+  const resetImageList = useCallback((nextStatus: StatusState = { key: 'imageListReset' }) => {
+    for (const image of imagesRef.current) {
+      URL.revokeObjectURL(image.url)
+    }
+
+    imagesRef.current = []
+    activeImageRef.current = null
+    drawSessionRef.current = null
+    setImages([])
+    setActiveId(undefined)
+    setSelection(null)
+    setCanvasSize({ width: 1, height: 1 })
+    setStatus(nextStatus)
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    if (folderInputRef.current) {
+      folderInputRef.current.value = ''
+    }
   }, [])
 
   const addOperation = useCallback(
@@ -357,13 +381,13 @@ function App() {
 
       const archive = await zip.generateAsync({ type: 'blob' })
       downloadBlob(archive, 'image-mosaic-effect-export.zip')
-      setStatus({ key: 'exportedImages', count: images.length })
+      resetImageList({ key: 'exportedImages', count: images.length })
     } catch {
       setStatus({ key: 'exportFailed' })
     } finally {
       setIsExporting(false)
     }
-  }, [images, isExporting, settings])
+  }, [images, isExporting, resetImageList, settings])
 
   const selectionStyle = useMemo(() => {
     if (!selection) {
@@ -455,6 +479,15 @@ function App() {
               <h2>{copy.queue.title}</h2>
               <p>{copy.queue.count(editedCount, images.length)}</p>
             </div>
+            <button
+              type="button"
+              className="icon-button"
+              title={copy.queue.reset}
+              disabled={!images.length}
+              onClick={() => resetImageList()}
+            >
+              <Trash2 aria-hidden="true" />
+            </button>
           </div>
           <div className="image-list">
             {images.map((image, index) => (
@@ -552,89 +585,97 @@ function App() {
             </div>
           </div>
 
-          <fieldset>
-            <legend>{copy.settings.mosaicType}</legend>
-            <div className="segmented">
-              {(['pixelate', 'blur', 'noise'] as MosaicType[]).map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  className={settings.mosaicType === type ? 'is-selected' : ''}
-                  onClick={() => updateSettings({ mosaicType: type })}
-                >
-                  {copy.settings.mosaicTypes[type]}
-                </button>
-              ))}
-            </div>
-          </fieldset>
+          <div className="settings-row settings-row-modes">
+            <fieldset>
+              <legend>{copy.settings.mosaicType}</legend>
+              <div className="segmented">
+                {(['pixelate', 'blur', 'noise'] as MosaicType[]).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    className={settings.mosaicType === type ? 'is-selected' : ''}
+                    onClick={() => updateSettings({ mosaicType: type })}
+                  >
+                    {copy.settings.mosaicTypes[type]}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
 
-          <fieldset>
-            <legend>{copy.settings.tool}</legend>
-            <div className="tool-grid">
-              {TOOL_OPTIONS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={settings.drawTool === item.id ? 'tool-button is-selected' : 'tool-button'}
-                  onClick={() => updateSettings({ drawTool: item.id as DrawTool })}
-                >
-                  <item.Icon aria-hidden="true" />
-                  {copy.settings.tools[item.id]}
-                </button>
-              ))}
-            </div>
-          </fieldset>
+            <fieldset>
+              <legend>{copy.settings.tool}</legend>
+              <div className="tool-grid">
+                {TOOL_OPTIONS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={
+                      settings.drawTool === item.id ? 'tool-button is-selected' : 'tool-button'
+                    }
+                    onClick={() => updateSettings({ drawTool: item.id as DrawTool })}
+                  >
+                    <item.Icon aria-hidden="true" />
+                    {copy.settings.tools[item.id]}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          </div>
 
-          <RangeControl
-            label={copy.settings.brushSize}
-            value={settings.brushSize}
-            min={16}
-            max={220}
-            step={2}
-            suffix="px"
-            onChange={(brushSize) => updateSettings({ brushSize })}
-          />
-          <RangeControl
-            label={copy.settings.blockSize}
-            value={settings.blockSize}
-            min={4}
-            max={48}
-            step={1}
-            suffix="px"
-            onChange={(blockSize) => updateSettings({ blockSize })}
-          />
-          <RangeControl
-            label={copy.settings.strength}
-            value={Math.round(settings.strength * 100)}
-            min={10}
-            max={100}
-            step={1}
-            suffix="%"
-            onChange={(value) => updateSettings({ strength: value / 100 })}
-          />
-
-          <label className="field">
-            <span>{copy.settings.fileSuffix}</span>
-            <input
-              value={settings.suffix}
-              maxLength={32}
-              onChange={(event) => updateSettings({ suffix: event.currentTarget.value })}
+          <div className="settings-row settings-row-ranges">
+            <RangeControl
+              label={copy.settings.brushSize}
+              value={settings.brushSize}
+              min={16}
+              max={220}
+              step={2}
+              suffix="px"
+              onChange={(brushSize) => updateSettings({ brushSize })}
             />
-          </label>
+            <RangeControl
+              label={copy.settings.blockSize}
+              value={settings.blockSize}
+              min={4}
+              max={48}
+              step={1}
+              suffix="px"
+              onChange={(blockSize) => updateSettings({ blockSize })}
+            />
+            <RangeControl
+              label={copy.settings.strength}
+              value={Math.round(settings.strength * 100)}
+              min={10}
+              max={100}
+              step={1}
+              suffix="%"
+              onChange={(value) => updateSettings({ strength: value / 100 })}
+            />
+          </div>
 
-          <label className="field">
-            <span>{copy.settings.exportFormat}</span>
-            <select
-              value={settings.exportFormat}
-              onChange={(event) =>
-                updateSettings({ exportFormat: event.currentTarget.value as ExportFormat })
-              }
-            >
-              <option value="original">{copy.settings.originalExtension}</option>
-              <option value="png">{copy.settings.png}</option>
-              <option value="jpeg">{copy.settings.jpeg}</option>
-            </select>
-          </label>
+          <div className="settings-row settings-row-output">
+            <label className="field">
+              <span>{copy.settings.fileSuffix}</span>
+              <input
+                value={settings.suffix}
+                maxLength={32}
+                onChange={(event) => updateSettings({ suffix: event.currentTarget.value })}
+              />
+            </label>
+
+            <label className="field">
+              <span>{copy.settings.exportFormat}</span>
+              <select
+                value={settings.exportFormat}
+                onChange={(event) =>
+                  updateSettings({ exportFormat: event.currentTarget.value as ExportFormat })
+                }
+              >
+                <option value="original">{copy.settings.originalExtension}</option>
+                <option value="png">{copy.settings.png}</option>
+                <option value="jpeg">{copy.settings.jpeg}</option>
+              </select>
+            </label>
+          </div>
 
         </aside>}
       </main>
