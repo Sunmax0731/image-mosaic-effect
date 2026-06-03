@@ -458,7 +458,27 @@ legend,
 }
 
 .preset-button {
-  padding: 0 8px;
+  min-width: 0;
+  min-height: 62px;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 5px;
+  line-height: 1.1;
+}
+
+.preset-logo {
+  width: 30px;
+  height: 30px;
+  display: block;
+  flex: 0 0 30px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.preset-label {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .range-field,
@@ -730,6 +750,18 @@ input[type='range'] {
     gap: 4px;
     padding: 0 4px;
     font-size: 11px;
+  }
+
+  .preset-button {
+    min-height: 50px;
+    padding: 4px 3px;
+  }
+
+  .preset-logo {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+    border-radius: 5px;
   }
 
   .range-field > span {

@@ -51,6 +51,8 @@ import {
   normalizeSettings,
   saveSettings,
 } from './lib/settings'
+import fantiaLogoUrl from './assets/fantia-logo.svg'
+import skebLogoUrl from './assets/skeb-logo.svg'
 import type {
   CanvasPoint,
   DrawTool,
@@ -70,6 +72,11 @@ const TOOL_OPTIONS = [
   { id: 'brush', Icon: Brush },
   { id: 'rectangle', Icon: SquareDashedMousePointer },
 ] as const
+const PRESET_LOGOS: Record<MosaicPresetId, string> = {
+  fantiaPixelate: fantiaLogoUrl,
+  fantiaBlur: fantiaLogoUrl,
+  skebPixelate: skebLogoUrl,
+}
 
 type ViewMode = 'fit-width' | 'fit-height' | 'actual' | 'custom'
 type InteractionMode = 'edit' | 'pan'
@@ -922,7 +929,13 @@ function App() {
                         title={disabled ? copy.settings.skebNeedsImage : undefined}
                         onClick={() => applyPreset(preset.id)}
                       >
-                        {copy.settings.presetLabels[preset.id]}
+                        <img
+                          className="preset-logo"
+                          src={PRESET_LOGOS[preset.id]}
+                          alt=""
+                          aria-hidden="true"
+                        />
+                        <span className="preset-label">{copy.settings.presetLabels[preset.id]}</span>
                       </button>
                     )
                   })}

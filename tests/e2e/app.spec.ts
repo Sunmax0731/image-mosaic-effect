@@ -87,6 +87,9 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await expect(page.getByTestId('mosaic-canvas')).toBeVisible()
   await expect(page.getByTestId('mosaic-canvas')).toBeInViewport()
 
+  await expect(page.locator('.preset-logo')).toHaveCount(3)
+  await expect(page.getByRole('button', { name: 'Fantia ピクセル' }).locator('.preset-logo')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Skeb 1%' }).locator('.preset-logo')).toBeVisible()
   await page.getByRole('button', { name: 'Fantia ピクセル' }).click()
   await expect(page.getByLabel('ブロックサイズ')).toHaveValue('72')
   await page.getByRole('button', { name: 'Fantia ぼかし' }).click()
@@ -142,13 +145,13 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await expect(page.getByTitle('編集')).toHaveAttribute('aria-pressed', 'true')
   await page.getByTitle('編集').click()
 
+  await canvas.scrollIntoViewIfNeeded()
   const box = await canvas.boundingBox()
   expect(box).not.toBeNull()
   if (!box) {
     return
   }
 
-  await canvas.scrollIntoViewIfNeeded()
   await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.35)
   await page.mouse.down()
   await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.65, { steps: 5 })

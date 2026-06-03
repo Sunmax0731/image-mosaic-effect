@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Fantia">
+  <rect width="128" height="128" rx="18" fill="#ffffff"/>
+  <g font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="49">
+    <text x="10" y="50" fill="#8cc63f" transform="rotate(-5 10 50)">F</text>
+    <text x="55" y="44" fill="#ec008c">3</text>
+    <text x="92" y="58" fill="#8e3f97" transform="rotate(-3 92 58)">n</text>
+    <text x="4" y="104" fill="#00a6b4" transform="rotate(3 4 104)">t</text>
+    <text x="53" y="106" fill="#2e3192" transform="rotate(8 53 106)">i</text>
+    <text x="88" y="104" fill="#f15a24" transform="rotate(-4 88 104)">a</text>
+  </g>
+</svg>

@@ -4,6 +4,8 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [x] [P2] [Phase:04-implementation] Fantia/Skebプリセットにロゴを表示 [Issue](Issues/0007-preset-logos.md) [QCDS:Quality,Satisfaction]
+
 - [x] Remove visible `画像一覧` and `設定` section heading text.
 - [x] Add an image-list show/hide toggle next to the image-list reset button.
 - [x] Replace the image list when importing from a folder instead of appending to it.
