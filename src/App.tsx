@@ -8,7 +8,6 @@ import {
   FolderOpen,
   Images,
   RotateCcw,
-  Save,
   SlidersHorizontal,
   SquareDashedMousePointer,
   Undo2,
@@ -165,6 +164,11 @@ function App() {
 
   const updateSettings = useCallback((patch: Partial<MosaicSettings>) => {
     setSettings((current) => normalizeSettings({ ...current, ...patch }))
+    setStatus({ key: 'settingsSaved' })
+  }, [])
+
+  const resetSettings = useCallback(() => {
+    setSettings(DEFAULT_SETTINGS)
     setStatus({ key: 'settingsSaved' })
   }, [])
 
@@ -386,33 +390,41 @@ function App() {
         </div>
 
         <div className="topbar-actions">
-          <button type="button" className="button" onClick={() => fileInputRef.current?.click()}>
-            <Images aria-hidden="true" />
-            {copy.actions.importFiles}
-          </button>
-          <button type="button" className="button" onClick={() => folderInputRef.current?.click()}>
-            <FolderOpen aria-hidden="true" />
-            {copy.actions.importFolder}
-          </button>
-          <button
-            type="button"
-            className="button button-primary"
-            disabled={!images.length || isExporting}
-            onClick={exportAll}
-          >
-            <Download aria-hidden="true" />
-            {isExporting ? copy.actions.exporting : copy.actions.exportAll}
-          </button>
-          <button
-            type="button"
-            className={`button settings-toggle ${settingsOpen ? 'is-active' : ''}`}
-            title={settingsOpen ? copy.actions.hideSettings : copy.actions.showSettings}
-            aria-pressed={settingsOpen}
-            onClick={() => setSettingsOpen((current) => !current)}
-          >
-            <SlidersHorizontal aria-hidden="true" />
-            {settingsOpen ? copy.actions.hideSettings : copy.actions.showSettings}
-          </button>
+          <div className="primary-actions">
+            <button type="button" className="button" onClick={() => fileInputRef.current?.click()}>
+              <Images aria-hidden="true" />
+              {copy.actions.importFiles}
+            </button>
+            <button type="button" className="button" onClick={() => folderInputRef.current?.click()}>
+              <FolderOpen aria-hidden="true" />
+              {copy.actions.importFolder}
+            </button>
+            <button
+              type="button"
+              className="button button-primary"
+              disabled={!images.length || isExporting}
+              onClick={exportAll}
+            >
+              <Download aria-hidden="true" />
+              {isExporting ? copy.actions.exporting : copy.actions.exportAll}
+            </button>
+          </div>
+          <div className="settings-actions">
+            <button
+              type="button"
+              className={`button settings-toggle ${settingsOpen ? 'is-active' : ''}`}
+              title={settingsOpen ? copy.actions.hideSettings : copy.actions.showSettings}
+              aria-pressed={settingsOpen}
+              onClick={() => setSettingsOpen((current) => !current)}
+            >
+              <SlidersHorizontal aria-hidden="true" />
+              {settingsOpen ? copy.actions.hideSettings : copy.actions.showSettings}
+            </button>
+            <button type="button" className="button" onClick={resetSettings}>
+              <RotateCcw aria-hidden="true" />
+              {copy.settings.reset}
+            </button>
+          </div>
         </div>
 
         <input
@@ -466,10 +478,6 @@ function App() {
 
         <section className="canvas-panel" aria-label={copy.editor.label}>
           <div className="canvas-toolbar">
-            <div>
-              <h2>{activeImage ? copy.editor.activeTitle : copy.editor.readyTitle}</h2>
-              <p>{activeImage ? copy.editor.activeHint : copy.editor.readyHint}</p>
-            </div>
             <div className="icon-actions">
               <button
                 type="button"
@@ -535,25 +543,13 @@ function App() {
               </div>
             )}
           </div>
-
-          <footer className="bottom-status">
-            <span>
-              {copy.editor.progress(activeIndex >= 0 ? activeIndex + 1 : 0, images.length)}
-            </span>
-            <span>{copy.editor.toolMode[settings.drawTool]}</span>
-            <span>{copy.settings.mosaicTypes[settings.mosaicType]}</span>
-          </footer>
         </section>
 
         {settingsOpen && <aside className="settings-panel" aria-label={copy.settings.label}>
           <div className="panel-header">
             <div>
               <h2>{copy.settings.title}</h2>
-              <p>
-                <Save aria-hidden="true" /> {copy.settings.persisted}
-              </p>
             </div>
-            <SlidersHorizontal aria-hidden="true" />
           </div>
 
           <fieldset>
@@ -640,16 +636,6 @@ function App() {
             </select>
           </label>
 
-          <button
-            type="button"
-            className="button reset-settings"
-            onClick={() => {
-              setSettings(DEFAULT_SETTINGS)
-              setStatus({ key: 'settingsSaved' })
-            }}
-          >
-            {copy.settings.reset}
-          </button>
         </aside>}
       </main>
     </div>

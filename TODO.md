@@ -4,6 +4,14 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [x] Move the settings reset action next to the settings show/hide toggle in the top toolbar.
+- [x] Keep import files, import folder, and export all on one row across mobile widths.
+- [x] Remove editor header status/instruction text and the bottom progress/tool status bar.
+- [x] Remove the persisted-status text and icon from the settings panel header.
+- [x] Validate the compact editor UI with lint, tests, e2e, and rendered screenshots.
+
+## Completed Localization Iteration
+
 - [x] Replace the settings panel close button with one always-visible toggle button whose label/state changes.
 - [x] Localize visible UI text to Japanese by default.
 - [x] Add language-switching infrastructure without rendering a language selector UI.

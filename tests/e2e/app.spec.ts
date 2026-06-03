@@ -16,6 +16,13 @@ test('imports an image, applies a brush operation, persists settings, and export
   await expect(page.getByRole('heading', { name: '画像モザイク加工' })).toBeVisible()
 
   await expect(page.getByLabel('保存形式')).toHaveValue('original')
+  await expect(page.getByRole('banner').getByRole('button', { name: /設定を初期化/ })).toBeVisible()
+  await expect(page.getByText('保存済み', { exact: true })).toHaveCount(0)
+
+  const primaryButtonTops = await page.locator('.primary-actions .button').evaluateAll((buttons) =>
+    buttons.map((button) => Math.round(button.getBoundingClientRect().top)),
+  )
+  expect(new Set(primaryButtonTops).size).toBe(1)
 
   await page.getByTestId('file-input').setInputFiles(
     Array.from({ length: 16 }, (_, index) => ({
@@ -25,8 +32,10 @@ test('imports an image, applies a brush operation, persists settings, and export
     })),
   )
 
-  await expect(page.getByRole('heading', { name: '編集中' })).toBeVisible()
+  await expect(page.getByText('編集中', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('範囲を指定してモザイクを適用します')).toHaveCount(0)
   await expect(page.getByText('sample-01.png')).toHaveCount(0)
+  await expect(page.locator('.bottom-status')).toHaveCount(0)
   await expect(page.getByTestId('mosaic-canvas')).toBeVisible()
   await expect(page.getByTestId('mosaic-canvas')).toBeInViewport()
 
@@ -34,6 +43,10 @@ test('imports an image, applies a brush operation, persists settings, and export
     return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth
   })
   expect(queueScrolls).toBe(true)
+
+  await page.getByLabel('接尾辞').fill('_temporary')
+  await page.getByRole('banner').getByRole('button', { name: /設定を初期化/ }).click()
+  await expect(page.getByLabel('接尾辞')).toHaveValue('_mosaic')
 
   await page.getByRole('banner').getByTitle('設定を隠す').click()
   await expect(page.getByRole('complementary', { name: 'モザイク設定' })).toBeHidden()

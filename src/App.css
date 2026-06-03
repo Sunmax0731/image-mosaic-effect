@@ -20,9 +20,10 @@
 
 .brand,
 .topbar-actions,
+.primary-actions,
+.settings-actions,
 .icon-actions,
-.panel-header,
-.bottom-status {
+.panel-header {
   display: flex;
   align-items: center;
 }
@@ -78,6 +79,11 @@ small,
   gap: 8px;
 }
 
+.primary-actions,
+.settings-actions {
+  gap: 8px;
+}
+
 .button,
 .icon-button,
 .segmented button,
@@ -106,8 +112,7 @@ small,
 .icon-button svg,
 .tool-button svg,
 .panel-header svg,
-.empty-stage svg,
-.settings-panel p svg {
+.empty-stage svg {
   width: 17px;
   height: 17px;
 }
@@ -229,14 +234,13 @@ small,
 
 .canvas-panel {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
   background:
     linear-gradient(90deg, rgba(15, 118, 110, 0.05), transparent 28%),
     var(--app-bg);
 }
 
-.canvas-toolbar,
-.bottom-status {
+.canvas-toolbar {
   padding: 14px 18px;
   background: rgba(255, 255, 255, 0.74);
   backdrop-filter: blur(10px);
@@ -245,7 +249,7 @@ small,
 .canvas-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   border-bottom: 1px solid var(--line);
 }
@@ -279,7 +283,7 @@ small,
 .canvas-wrap {
   position: relative;
   max-width: min(100%, 980px);
-  max-height: calc(100svh - 190px);
+  max-height: calc(100svh - 155px);
   display: grid;
   border: 1px solid rgba(15, 23, 42, 0.16);
   border-radius: 8px;
@@ -291,7 +295,7 @@ small,
 canvas {
   width: auto;
   max-width: 100%;
-  max-height: calc(100svh - 190px);
+  max-height: calc(100svh - 155px);
   height: auto;
   display: block;
   touch-action: none;
@@ -325,12 +329,6 @@ canvas {
 
 .empty-stage strong {
   color: var(--heading);
-}
-
-.bottom-status {
-  justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--line);
 }
 
 fieldset {
@@ -429,11 +427,6 @@ input[type='range'] {
   accent-color: #0f766e;
 }
 
-.reset-settings {
-  width: 100%;
-  margin-top: auto;
-}
-
 :focus-visible {
   outline: 3px solid rgba(20, 184, 166, 0.35);
   outline-offset: 2px;
@@ -447,11 +440,20 @@ input[type='range'] {
 
   .topbar-actions {
     width: 100%;
-    justify-content: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
   }
 
-  .topbar-actions .button {
-    flex: 1 1 150px;
+  .primary-actions {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .settings-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, auto));
   }
 
   .workspace {
@@ -506,11 +508,19 @@ input[type='range'] {
 
   .topbar-actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .topbar-actions .button-primary {
-    grid-column: 1 / -1;
+  .button {
+    min-height: 36px;
+    gap: 6px;
+    padding: 0 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .settings-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .queue-panel,
@@ -535,13 +545,7 @@ input[type='range'] {
   }
 
   canvas {
-    max-height: calc(100svh - 230px);
+    max-height: calc(100svh - 210px);
   }
 
-  .bottom-status {
-    align-items: center;
-    flex-direction: row;
-    padding: 8px 12px;
-    font-size: 11px;
-  }
 }
