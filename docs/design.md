@@ -11,9 +11,9 @@ The primary user is doing repeated manual review on a smartphone or desktop brow
 ## Screen Model
 
 - Top toolbar: app identity, import files, import folder, export all, settings-save status, the single settings show/hide toggle, and settings reset.
-- Queue panel: large thumbnail-only buttons, edited-count summary, list reset action, and internal scrolling for large batches.
+- Queue panel: large thumbnail-only buttons, edited-count summary, list visibility toggle, list reset action, and internal scrolling for large batches. The visible `画像一覧` heading is intentionally omitted to reserve space for images.
 - Canvas panel: current image, brush/rectangle editing, undo/reset, and previous/next navigation without editor status text.
-- Settings panel: mosaic type, tool, brush size, block size, strength, suffix, and export format.
+- Settings panel: mosaic type, tool, brush size, block size, strength, suffix, and export format. The visible `設定` heading is intentionally omitted to keep the tool area compact.
 
 ## UI Direction
 
@@ -22,11 +22,13 @@ The primary user is doing repeated manual review on a smartphone or desktop brow
 - Light neutral background with teal primary actions and amber selection feedback.
 - Compact controls, 8px or smaller radii, readable mobile collapse.
 - Import files, import folder, and export all remain on one row on narrow screens.
+- Importing individual files appends to the current list; importing a folder replaces the current list so a new batch starts cleanly.
 - Loaded images can be cleared manually; successful batch export also clears the image list so the next batch starts from a clean state.
 - Page-level scrolling is avoided in the primary editor; queue, canvas, and settings surfaces scroll internally when needed.
 - Smartphone settings use horizontal groups for mosaic/tool selection, range controls, and output fields to avoid settings-panel scrolling.
 - Active images align near the top of the canvas work area so imported content is visible immediately.
 - File names, image dimensions, byte sizes, editor state text, and bottom progress/tool text are hidden to keep the review surface visual-first.
+- The image list can be collapsed into a narrow rail with one persistent icon button, which leaves more width for the canvas while keeping the reset action nearby.
 - Export format defaults to `Original extension` so batch output follows the loaded file names unless the user chooses PNG or JPEG.
 - No server or upload affordance because local privacy is part of the product contract.
 
@@ -34,4 +36,5 @@ The primary user is doing repeated manual review on a smartphone or desktop brow
 
 - Desktop: queue, canvas, and settings are visible in a three-column workspace.
 - Tablet/mobile: panels stack, queue becomes a larger horizontal strip, canvas stays the main work surface, and settings controls are compacted into horizontal groups.
+- When the queue is collapsed on tablet/mobile, the canvas moves closer to the top of the first viewport.
 - Touch input uses pointer events and `touch-action: none` on the canvas.

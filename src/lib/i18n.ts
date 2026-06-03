@@ -32,6 +32,8 @@ export interface UiCopy {
     label: string
     title: string
     count: (edited: number, total: number) => string
+    show: string
+    hide: string
     reset: string
     empty: string
     thumbnailLabel: (index: number, total: number, edited: boolean) => string
@@ -100,6 +102,8 @@ export const UI_COPY: Record<Language, UiCopy> = {
       label: '画像一覧',
       title: '画像一覧',
       count: (edited, total) => `${edited}/${total} 加工済み`,
+      show: '画像一覧を表示',
+      hide: '画像一覧を隠す',
       reset: 'リストをリセット',
       empty: '画像なし',
       thumbnailLabel: (index, total, edited) =>
@@ -177,6 +181,8 @@ export const UI_COPY: Record<Language, UiCopy> = {
       label: 'Image queue',
       title: 'Queue',
       count: (edited, total) => `${edited}/${total} edited`,
+      show: 'Show image list',
+      hide: 'Hide image list',
       reset: 'Reset list',
       empty: 'No images',
       thumbnailLabel: (index, total, edited) =>

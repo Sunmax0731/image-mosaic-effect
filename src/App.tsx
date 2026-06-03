@@ -5,6 +5,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Eye,
+  EyeOff,
   FolderOpen,
   Images,
   RotateCcw,
@@ -84,6 +86,7 @@ function App() {
   const [canvasSize, setCanvasSize] = useState({ width: 1, height: 1 })
   const [isExporting, setIsExporting] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(true)
+  const [imageListOpen, setImageListOpen] = useState(true)
   const [status, setStatus] = useState<StatusState>({ key: 'settingsSaved' })
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -174,7 +177,7 @@ function App() {
     setStatus({ key: 'settingsSaved' })
   }, [])
 
-  const resetImageList = useCallback((nextStatus: StatusState = { key: 'imageListReset' }) => {
+  const clearLoadedImages = useCallback(() => {
     for (const image of imagesRef.current) {
       URL.revokeObjectURL(image.url)
     }
@@ -186,7 +189,6 @@ function App() {
     setActiveId(undefined)
     setSelection(null)
     setCanvasSize({ width: 1, height: 1 })
-    setStatus(nextStatus)
 
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
@@ -195,6 +197,14 @@ function App() {
       folderInputRef.current.value = ''
     }
   }, [])
+
+  const resetImageList = useCallback(
+    (nextStatus: StatusState = { key: 'imageListReset' }) => {
+      clearLoadedImages()
+      setStatus(nextStatus)
+    },
+    [clearLoadedImages],
+  )
 
   const addOperation = useCallback(
     (operation: ReturnType<typeof createBrushOperation>) => {
@@ -218,7 +228,7 @@ function App() {
   )
 
   const importFiles = useCallback(
-    (fileList: FileList | null) => {
+    (fileList: FileList | null, options: { replace?: boolean } = {}) => {
       if (!fileList?.length) {
         return
       }
@@ -236,16 +246,20 @@ function App() {
           operations: [],
         }))
 
+      if (options.replace) {
+        clearLoadedImages()
+      }
+
       if (!nextImages.length) {
         setStatus({ key: 'noSupportedImages' })
         return
       }
 
-      setImages((current) => [...current, ...nextImages])
-      setActiveId((current) => current ?? nextImages[0].id)
+      setImages((current) => (options.replace ? nextImages : [...current, ...nextImages]))
+      setActiveId((current) => (options.replace ? nextImages[0].id : current ?? nextImages[0].id))
       setStatus({ key: 'imagesImported', count: nextImages.length })
     },
-    [],
+    [clearLoadedImages],
   )
 
   const undoOperation = useCallback(() => {
@@ -468,45 +482,68 @@ function App() {
           accept="image/*"
           type="file"
           {...{ webkitdirectory: '', directory: '' }}
-          onChange={(event) => importFiles(event.currentTarget.files)}
+          onChange={(event) => importFiles(event.currentTarget.files, { replace: true })}
         />
       </header>
 
-      <main className={`workspace ${settingsOpen ? '' : 'settings-collapsed'}`}>
-        <aside className="queue-panel" aria-label={copy.queue.label}>
-          <div className="panel-header">
-            <div>
-              <h2>{copy.queue.title}</h2>
-              <p>{copy.queue.count(editedCount, images.length)}</p>
-            </div>
-            <button
-              type="button"
-              className="icon-button"
-              title={copy.queue.reset}
-              disabled={!images.length}
-              onClick={() => resetImageList()}
-            >
-              <Trash2 aria-hidden="true" />
-            </button>
-          </div>
-          <div className="image-list">
-            {images.map((image, index) => (
+      <main
+        className={[
+          'workspace',
+          settingsOpen ? '' : 'settings-collapsed',
+          imageListOpen ? '' : 'queue-collapsed',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <aside
+          className={`queue-panel ${imageListOpen ? '' : 'is-collapsed'}`}
+          aria-label={copy.queue.label}
+        >
+          <div className="panel-header queue-header">
+            {imageListOpen && (
+              <p className="queue-summary">{copy.queue.count(editedCount, images.length)}</p>
+            )}
+            <div className="queue-actions">
               <button
-                key={image.id}
                 type="button"
-                className={`image-row ${image.id === activeId ? 'is-active' : ''}`}
-                aria-label={copy.queue.thumbnailLabel(
-                  index + 1,
-                  images.length,
-                  image.operations.length > 0,
-                )}
-                onClick={() => setActiveId(image.id)}
+                className="icon-button"
+                title={imageListOpen ? copy.queue.hide : copy.queue.show}
+                aria-pressed={imageListOpen}
+                onClick={() => setImageListOpen((current) => !current)}
               >
-                <img src={image.url} alt="" />
+                {imageListOpen ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
               </button>
-            ))}
-            {!images.length && <div className="empty-list">{copy.queue.empty}</div>}
+              <button
+                type="button"
+                className="icon-button"
+                title={copy.queue.reset}
+                disabled={!images.length}
+                onClick={() => resetImageList()}
+              >
+                <Trash2 aria-hidden="true" />
+              </button>
+            </div>
           </div>
+          {imageListOpen && (
+            <div className="image-list">
+              {images.map((image, index) => (
+                <button
+                  key={image.id}
+                  type="button"
+                  className={`image-row ${image.id === activeId ? 'is-active' : ''}`}
+                  aria-label={copy.queue.thumbnailLabel(
+                    index + 1,
+                    images.length,
+                    image.operations.length > 0,
+                  )}
+                  onClick={() => setActiveId(image.id)}
+                >
+                  <img src={image.url} alt="" />
+                </button>
+              ))}
+              {!images.length && <div className="empty-list">{copy.queue.empty}</div>}
+            </div>
+          )}
         </aside>
 
         <section className="canvas-panel" aria-label={copy.editor.label}>
@@ -578,106 +615,101 @@ function App() {
           </div>
         </section>
 
-        {settingsOpen && <aside className="settings-panel" aria-label={copy.settings.label}>
-          <div className="panel-header">
-            <div>
-              <h2>{copy.settings.title}</h2>
+        {settingsOpen && (
+          <aside className="settings-panel" aria-label={copy.settings.label}>
+            <div className="settings-row settings-row-modes">
+              <fieldset>
+                <legend>{copy.settings.mosaicType}</legend>
+                <div className="segmented">
+                  {(['pixelate', 'blur', 'noise'] as MosaicType[]).map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      className={settings.mosaicType === type ? 'is-selected' : ''}
+                      onClick={() => updateSettings({ mosaicType: type })}
+                    >
+                      {copy.settings.mosaicTypes[type]}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>{copy.settings.tool}</legend>
+                <div className="tool-grid">
+                  {TOOL_OPTIONS.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={
+                        settings.drawTool === item.id ? 'tool-button is-selected' : 'tool-button'
+                      }
+                      onClick={() => updateSettings({ drawTool: item.id as DrawTool })}
+                    >
+                      <item.Icon aria-hidden="true" />
+                      {copy.settings.tools[item.id]}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
             </div>
-          </div>
 
-          <div className="settings-row settings-row-modes">
-            <fieldset>
-              <legend>{copy.settings.mosaicType}</legend>
-              <div className="segmented">
-                {(['pixelate', 'blur', 'noise'] as MosaicType[]).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    className={settings.mosaicType === type ? 'is-selected' : ''}
-                    onClick={() => updateSettings({ mosaicType: type })}
-                  >
-                    {copy.settings.mosaicTypes[type]}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend>{copy.settings.tool}</legend>
-              <div className="tool-grid">
-                {TOOL_OPTIONS.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={
-                      settings.drawTool === item.id ? 'tool-button is-selected' : 'tool-button'
-                    }
-                    onClick={() => updateSettings({ drawTool: item.id as DrawTool })}
-                  >
-                    <item.Icon aria-hidden="true" />
-                    {copy.settings.tools[item.id]}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-
-          <div className="settings-row settings-row-ranges">
-            <RangeControl
-              label={copy.settings.brushSize}
-              value={settings.brushSize}
-              min={16}
-              max={220}
-              step={2}
-              suffix="px"
-              onChange={(brushSize) => updateSettings({ brushSize })}
-            />
-            <RangeControl
-              label={copy.settings.blockSize}
-              value={settings.blockSize}
-              min={4}
-              max={48}
-              step={1}
-              suffix="px"
-              onChange={(blockSize) => updateSettings({ blockSize })}
-            />
-            <RangeControl
-              label={copy.settings.strength}
-              value={Math.round(settings.strength * 100)}
-              min={10}
-              max={100}
-              step={1}
-              suffix="%"
-              onChange={(value) => updateSettings({ strength: value / 100 })}
-            />
-          </div>
-
-          <div className="settings-row settings-row-output">
-            <label className="field">
-              <span>{copy.settings.fileSuffix}</span>
-              <input
-                value={settings.suffix}
-                maxLength={32}
-                onChange={(event) => updateSettings({ suffix: event.currentTarget.value })}
+            <div className="settings-row settings-row-ranges">
+              <RangeControl
+                label={copy.settings.brushSize}
+                value={settings.brushSize}
+                min={16}
+                max={220}
+                step={2}
+                suffix="px"
+                onChange={(brushSize) => updateSettings({ brushSize })}
               />
-            </label>
+              <RangeControl
+                label={copy.settings.blockSize}
+                value={settings.blockSize}
+                min={4}
+                max={48}
+                step={1}
+                suffix="px"
+                onChange={(blockSize) => updateSettings({ blockSize })}
+              />
+              <RangeControl
+                label={copy.settings.strength}
+                value={Math.round(settings.strength * 100)}
+                min={10}
+                max={100}
+                step={1}
+                suffix="%"
+                onChange={(value) => updateSettings({ strength: value / 100 })}
+              />
+            </div>
 
-            <label className="field">
-              <span>{copy.settings.exportFormat}</span>
-              <select
-                value={settings.exportFormat}
-                onChange={(event) =>
-                  updateSettings({ exportFormat: event.currentTarget.value as ExportFormat })
-                }
-              >
-                <option value="original">{copy.settings.originalExtension}</option>
-                <option value="png">{copy.settings.png}</option>
-                <option value="jpeg">{copy.settings.jpeg}</option>
-              </select>
-            </label>
-          </div>
+            <div className="settings-row settings-row-output">
+              <label className="field">
+                <span>{copy.settings.fileSuffix}</span>
+                <input
+                  value={settings.suffix}
+                  maxLength={32}
+                  onChange={(event) => updateSettings({ suffix: event.currentTarget.value })}
+                />
+              </label>
 
-        </aside>}
+              <label className="field">
+                <span>{copy.settings.exportFormat}</span>
+                <select
+                  value={settings.exportFormat}
+                  onChange={(event) =>
+                    updateSettings({ exportFormat: event.currentTarget.value as ExportFormat })
+                  }
+                >
+                  <option value="original">{copy.settings.originalExtension}</option>
+                  <option value="png">{copy.settings.png}</option>
+                  <option value="jpeg">{copy.settings.jpeg}</option>
+                </select>
+              </label>
+            </div>
+          </aside>
+        )}
       </main>
     </div>
   )

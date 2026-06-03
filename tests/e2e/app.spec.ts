@@ -1,19 +1,32 @@
 import { expect, test } from '@playwright/test'
+import fs from 'node:fs'
+import path from 'node:path'
 
 const SAMPLE_PNG =
   'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAgklEQVR4nO3YQQqAIBRA0Vb3v2sXbWFDkqJwHwZ+QRcS8mAqWgAAAAAAAAAAsK1r7d6jXqv3zvMSz+Z8vC0h1+fKr9xg7Gm9yq2c0h7j4GNQZ8wq+8YgkY1nJr9qB9p3s+3nAqv5Dk5xw9e8a6q4a3Vx0m9zAgAAAAAAAAAA8G8f9gE2pQZtfsd0sAAAAABJRU5ErkJggg=='
 
-function sampleFiles(count = 16) {
+function sampleFiles(count = 16, prefix = 'sample') {
   return Array.from({ length: count }, (_, index) => ({
-    name: `sample-${String(index + 1).padStart(2, '0')}.png`,
+    name: `${prefix}-${String(index + 1).padStart(2, '0')}.png`,
     mimeType: 'image/png',
     buffer: Buffer.from(SAMPLE_PNG, 'base64'),
   }))
 }
 
-test('imports images, resets the list, applies a brush operation, persists settings, and exports a ZIP', async ({
+function sampleFolder(basePath: string, count = 6, prefix = 'folder') {
+  fs.mkdirSync(basePath, { recursive: true })
+  for (let index = 0; index < count; index += 1) {
+    fs.writeFileSync(
+      path.join(basePath, `${prefix}-${String(index + 1).padStart(2, '0')}.png`),
+      Buffer.from(SAMPLE_PNG, 'base64'),
+    )
+  }
+  return basePath
+}
+
+test('imports images, toggles and resets the list, replaces folder imports, and exports a ZIP', async ({
   page,
-}) => {
+}, testInfo) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: '画像モザイク加工' })).toBeVisible()
   await expect(page.getByText('画像なし')).toBeVisible()
@@ -26,15 +39,31 @@ test('imports images, resets the list, applies a brush operation, persists setti
   await expect(page.getByLabel('保存形式')).toHaveValue('original')
   await expect(page.getByRole('banner').getByRole('button', { name: /設定を初期化/ })).toBeVisible()
   await expect(page.getByText('保存済み', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('画像一覧', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('設定', { exact: true })).toHaveCount(0)
 
   const primaryButtonTops = await page.locator('.primary-actions .button').evaluateAll((buttons) =>
     buttons.map((button) => Math.round(button.getBoundingClientRect().top)),
   )
   expect(new Set(primaryButtonTops).size).toBe(1)
 
-  await page.getByTestId('file-input').setInputFiles(sampleFiles())
+  await page.getByTestId('file-input').setInputFiles(sampleFiles(16, 'file'))
   await expect(page.locator('.image-row')).toHaveCount(16)
+  await expect(page.getByTitle('画像一覧を隠す')).toBeVisible()
   await expect(page.getByTitle('リストをリセット')).toBeEnabled()
+
+  await page
+    .getByTestId('folder-input')
+    .setInputFiles(sampleFolder(testInfo.outputPath('folder-import')))
+  await expect(page.locator('.image-row')).toHaveCount(6)
+
+  await page.getByTitle('画像一覧を隠す').click()
+  await expect(page.locator('.image-list')).toHaveCount(0)
+  await expect(page.getByTestId('mosaic-canvas')).toBeVisible()
+  await expect(page.getByTitle('画像一覧を表示')).toBeVisible()
+  await page.getByTitle('画像一覧を表示').click()
+  await expect(page.locator('.image-row')).toHaveCount(6)
+
   await page.getByTitle('リストをリセット').click()
   await expect(page.locator('.image-row')).toHaveCount(0)
   await expect(page.getByText('画像なし')).toBeVisible()

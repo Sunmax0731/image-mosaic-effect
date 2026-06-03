@@ -10,12 +10,14 @@ describe('i18n', () => {
     expect(DEFAULT_LANGUAGE).toBe('ja')
     expect(UI_COPY.ja.appTitle).toBe('画像モザイク加工')
     expect(UI_COPY.ja.actions.importFiles).toBe('画像を追加')
+    expect(UI_COPY.ja.queue.hide).toBe('画像一覧を隠す')
     expect(UI_COPY.ja.queue.reset).toBe('リストをリセット')
     expect(UI_COPY.ja.status.imageListReset).toBe('画像一覧をリセットしました')
   })
 
   it('keeps English copy available for future language controls', () => {
     expect(UI_COPY.en.appTitle).toBe('Image Mosaic Effect')
+    expect(UI_COPY.en.queue.show).toBe('Show image list')
     expect(UI_COPY.en.queue.reset).toBe('Reset list')
     expect(normalizeLanguage('en')).toBe('en')
     expect(normalizeLanguage('unsupported')).toBe('ja')

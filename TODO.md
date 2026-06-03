@@ -4,6 +4,13 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [x] Remove visible `画像一覧` and `設定` section heading text.
+- [x] Add an image-list show/hide toggle next to the image-list reset button.
+- [x] Replace the image list when importing from a folder instead of appending to it.
+- [x] Validate the updated list/settings chrome with lint, tests, e2e, and rendered screenshots.
+
+## Completed List Reset Iteration
+
 - [x] Add a loaded-image list reset action.
 - [x] Clear the loaded-image list automatically after successful batch export.
 - [x] Compress mobile settings into horizontal groups for mosaic/tool, ranges, and suffix/export format.
