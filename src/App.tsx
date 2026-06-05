@@ -483,9 +483,9 @@ function App() {
   const prepareTwitterShare = useCallback(async () => {
     if (
       !activeImage ||
-      !activeImage.operations.length ||
       showBefore ||
-      isSharingPreview
+      isSharingPreview ||
+      !canvasRef.current
     ) {
       setStatus({ key: 'shareUnsupported' })
       return
@@ -495,12 +495,7 @@ function App() {
     setStatus({ key: 'preparingShare' })
 
     try {
-      const blob = await renderImageBlob(
-        activeImage.url,
-        activeImage.operations,
-        'png',
-        settings.jpegQuality,
-      )
+      const blob = await renderCanvasPngBlob(canvasRef.current)
       setSharePanel({
         blob,
         imageId: activeImage.id,
@@ -511,7 +506,7 @@ function App() {
     } finally {
       setIsSharingPreview(false)
     }
-  }, [activeImage, isSharingPreview, settings.jpegQuality, showBefore])
+  }, [activeImage, isSharingPreview, showBefore])
 
   const copyPreparedShareImage = useCallback(async () => {
     if (!sharePanel) {
@@ -1249,6 +1244,19 @@ async function copyImageBlobToClipboard(blob: Blob) {
   }
 }
 
+function renderCanvasPngBlob(canvas: HTMLCanvasElement) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob)
+        return
+      }
+
+      reject(new Error('Unable to render preview image.'))
+    }, 'image/png')
+  })
+}
+
 function createTwitterIntentUrl(text: string) {
   const url = new URL('https://twitter.com/intent/tweet')
   url.searchParams.set('text', text)
@@ -1272,10 +1280,6 @@ function getShareAvailability({
 
   if (!activeImage) {
     return { enabled: false, title: copy.editor.shareNeedsImage }
-  }
-
-  if (!activeImage.operations.length) {
-    return { enabled: false, title: copy.editor.shareNeedsMosaic }
   }
 
   if (showBefore) {

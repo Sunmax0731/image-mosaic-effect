@@ -25,13 +25,14 @@
 
 - Twitter Web Intent はローカルブラウザ内の画像ファイルを直接添付できないため、加工済みPNGをコピーまたは保存してユーザーが投稿画面へ貼り付け/添付する。
 - 共有ボタンはキャンバス操作列に追加し、現在選択中の画像にモザイク操作がある場合だけ有効化する。Before 表示中、未加工、未読み込みでは無効化し、title で状態を示す。
-- 共有時は active image の operation list だけを `renderImageBlob(..., 'png')` で描画し、共有パネルの `画像をコピー` / `画像を保存` が扱う画像を1件だけに限定する。
+- 共有時は現在表示中の after-preview canvas を PNG 化し、共有パネルの `画像をコピー` / `画像を保存` が扱う画像を1件だけに限定する。モバイルブラウザで operation-count state が期待通り入らない場合でも、表示中プレビューから共有を開始できるようにする。
 - 共有文はユーザー指定に合わせ、`#画像モザイク加工 #ImageMosaicEffect` と `https://sunmax0731.github.io/image-mosaic-effect/` の2行だけにする。
 - 検証: `npm run lint` passed, `npm test` passed, `npm run test:e2e` passed. Production preview `http://127.0.0.1:4176` returned HTTP 200, `dist/` was mirrored to `D:\AI\GithubPages\image-mosaic-effect`, and release docs ZIP was refreshed.
 - 追加調整: アイコンのみでは導線が見つけにくかったため、共有ボタンを `Twitterへ共有` のテキスト付きボタンに変更した。
 - 追加調整: ユーザー動作確認で画像コピーが行われないことが分かったため、共有ボタン押下時に加工済みPNGをクリップボードへコピーし、Twitter Web Intent を開く動作へ変更した。
 - 追加調整: モックなし Playwright で、`window.open()` と `clipboard.write()` を同一クリック内で実行すると popup 側が transient activation を消費し、通常権限では `NotAllowedError` で画像コピーに失敗することを確認した。原因解消として共有パネルを導入し、画像コピー、Twitterを開く、画像保存を別々のユーザー操作へ分離した。
 - 追加調整: ユーザー要望により、キャンバス操作列の共有導線を `Twitterへ共有` テキスト付きボタンからアイコンのみのボタンへ戻した。`title` / `aria-label` は `Twitterへ共有` のまま維持する。
+- 追加調整: スマホ幅では共有パネルがツールバー/内部スクロールに隠れる可能性があるため、`max-width: 640px` では画面下部の固定パネルとして表示する。
 - 自動添付ブロック: X/Twitter Web Intent は `text`、`url`、`hashtags` などの投稿文パラメータを受け取れるが、ローカル画像ファイルを自動添付するパラメータはない。完全自動添付には X API の media upload と OAuth、またはブラウザ拡張/外部自動化が必要で、静的サイト・ローカル画像維持の契約外になる。
 
 ## Codex Sessions

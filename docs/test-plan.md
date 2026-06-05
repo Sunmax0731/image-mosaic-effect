@@ -32,8 +32,8 @@ Platform gate for WebApp:
 15. Confirm brush drag operations display a circular cursor for the current brush footprint, and rectangle drags display a rectangular range while dragging.
 16. Confirm Before/After toggles original and edited preview without removing operations.
 17. Confirm fit-to-width, fit-to-height, 100%, zoom in/out, and pan change the preview only.
-18. Confirm Twitter share is disabled before a mosaic operation, disabled while Before view is active, and enabled after returning to the edited preview.
-19. Confirm Twitter share renders the share tray, the dedicated copy action copies exactly one PNG file for the active edited image to Clipboard API, and the Twitter intent link contains only `#画像モザイク加工 #ImageMosaicEffect` and `https://sunmax0731.github.io/image-mosaic-effect/` without adding app-side upload or remote processing paths.
+18. Confirm Twitter share is disabled before an image preview is generated, enabled after image load, disabled while Before view is active, and enabled after returning to the edited preview.
+19. Confirm Twitter share renders the share tray, the dedicated copy action copies exactly one PNG file for the current after-preview canvas to Clipboard API, and the Twitter intent link contains only `#画像モザイク加工 #ImageMosaicEffect` and `https://sunmax0731.github.io/image-mosaic-effect/` without adding app-side upload or remote processing paths.
 20. On smartphone width, select a thumbnail and confirm the image list collapses automatically, then can be reopened.
 21. Hide and show the settings panel from the same always-visible toolbar button.
 22. Confirm `window.imageMosaicEffect.setLanguage('en')` switches copy internally and `setLanguage('ja')` restores Japanese.
@@ -47,4 +47,4 @@ Platform gate for WebApp:
 - See [docs/user-guide.md](user-guide.md) for the user-facing manual checklist.
 - On mobile browsers, folder picking may be unavailable or converted into photo-library selection.
 - ZIP export support should be confirmed on the target phone because download handling differs between mobile browsers.
-- Twitter image copy depends on Clipboard API image write support and browser permission. Twitter Web Intent itself cannot attach local browser files directly, so image copy and Twitter opening are kept as separate user actions, and `画像を保存` is the fallback when clipboard writing is denied.
+- Twitter image copy depends on Clipboard API image write support and browser permission. Twitter Web Intent itself cannot attach local browser files directly, so image copy and Twitter opening are kept as separate user actions, and `画像を保存` is the fallback when clipboard writing is denied. On mobile, the share tray is fixed to the bottom of the viewport so it does not get clipped by the canvas toolbar or internal panel scroll.

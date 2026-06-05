@@ -744,6 +744,26 @@ input[type='range'] {
     flex: 0 0 34px;
   }
 
+  .share-tray {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 40;
+    max-height: min(44svh, 260px);
+    overflow-y: auto;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.28);
+  }
+
+  .share-tray span {
+    flex-basis: 100%;
+  }
+
+  .share-tray .button {
+    flex: 1 1 auto;
+    min-width: 104px;
+  }
+
   .zoom-level {
     min-width: 44px;
     align-self: center;

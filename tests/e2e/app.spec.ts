@@ -112,7 +112,8 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await expect(page.getByTestId('mosaic-canvas')).toHaveCount(0)
 
   await page.getByTestId('file-input').setInputFiles(sampleFiles())
-  await expect(page.getByTitle('モザイク適用後にTwitter共有できます')).toBeDisabled()
+  await expect(page.getByTestId('mosaic-canvas')).toBeVisible()
+  await expect(page.getByTitle('Twitterへ共有')).toBeEnabled()
 
   const isMobile = await page.evaluate(() => window.innerWidth <= 640)
   if (isMobile) {

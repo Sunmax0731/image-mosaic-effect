@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "project": "image-mosaic-effect",
-  "updatedAt": "2026-06-05T15:28:30+09:00",
+  "updatedAt": "2026-06-05T16:00:00+09:00",
   "ratings": {
     "quality": "A-",
     "cost": "A+",
@@ -31,7 +31,7 @@
       "name": "runtime-gate",
       "command": "npm run test:e2e",
       "status": "passed",
-      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, primary controls, settings reset, hidden queue/settings headings, image-list toggle/reset, folder import replacement, export auto-reset, official-logo Fantia presets with shortened visible labels, icon-only Skeb preset, Before/After preview, circular brush cursor visualization, preview fit/zoom/pan, Twitter share disabled states, share tray rendering, dedicated Clipboard API copy action receiving exactly one edited PNG file, Twitter intent link receiving the user-specified hashtags/URL text, mobile queue auto-collapse, mobile horizontal settings groups, visible canvas, settings toggle, persisted suffix, and ZIP export."
+      "evidence": "2 Playwright projects passed: chromium and mobile-chrome; checks include Japanese default UI, internal language switch API, primary controls, settings reset, hidden queue/settings headings, image-list toggle/reset, folder import replacement, export auto-reset, official-logo Fantia presets with shortened visible labels, icon-only Skeb preset, Before/After preview, circular brush cursor visualization, preview fit/zoom/pan, Twitter share disabled states, share tray rendering including mobile fixed-bottom visibility, dedicated Clipboard API copy action receiving exactly one edited PNG file, Twitter intent link receiving the user-specified hashtags/URL text, mobile queue auto-collapse, mobile horizontal settings groups, visible canvas, settings toggle, persisted suffix, and ZIP export."
     },
     {
       "name": "manual-docs",
