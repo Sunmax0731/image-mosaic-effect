@@ -152,6 +152,46 @@ small,
   background: #ecfdf5;
 }
 
+.share-button:not(:disabled) {
+  border-color: #1d9bf0;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.share-button:not(:disabled):hover {
+  background: #dbeafe;
+}
+
+.share-tray {
+  flex: 1 0 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+}
+
+.share-tray span {
+  flex: 1 1 240px;
+  min-width: 180px;
+  color: #1e3a8a;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.share-tray .button {
+  min-height: 34px;
+  background: #ffffff;
+}
+
+.share-link {
+  text-decoration: none;
+}
+
 .workspace {
   min-height: 0;
   height: 100%;
@@ -284,6 +324,7 @@ small,
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 16px;
   padding: 14px 18px;
   border-bottom: 1px solid var(--line);
@@ -691,6 +732,8 @@ input[type='range'] {
   .edit-actions {
     width: 100%;
     justify-content: space-between;
+    overflow-x: auto;
+    padding-bottom: 2px;
   }
 
   .view-controls .icon-button {
@@ -698,7 +741,7 @@ input[type='range'] {
   }
 
   .edit-actions .icon-button {
-    flex: 1;
+    flex: 0 0 34px;
   }
 
   .zoom-level {

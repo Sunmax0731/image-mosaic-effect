@@ -4,6 +4,8 @@ This file is the work contract for `image-mosaic-effect`.
 
 ## Current Iteration
 
+- [ ] [P2] [Phase:02-specification] Twitter画像添付の完全自動化は静的サイト単体では blocked [Issue](Issues/0011-twitter-auto-attach-blocked.md) [QCDS:Quality,Delivery,Satisfaction]
+- [x] [P2] [Phase:05-test] Twitter画像シェア機能の追加 [Issue](Issues/0010-twitter.md) [QCDS:Quality,Delivery,Satisfaction]
 - [x] [P2] [Phase:04-implementation] ブラシ処理範囲を円形カーソル表示に変更 [Issue](Issues/0009-brush-circle-cursor.md) [QCDS:Quality,Satisfaction]
 - [x] [P2] [Phase:04-implementation] Fantia/Skebプリセットの公式ロゴと短縮表示へ差し替え [Issue](Issues/0008-official-preset-logos.md) [QCDS:Quality,Satisfaction]
 - [x] [P2] [Phase:04-implementation] Fantia/Skebプリセットにロゴを表示 [Issue](Issues/0007-preset-logos.md) [QCDS:Quality,Satisfaction]
@@ -68,3 +70,5 @@ This file is the work contract for `image-mosaic-effect`.
 - [x] [P2] [Phase:04-implementation] モバイル画像選択後の一覧自動折りたたみ [Issue](Issues/0004-issue.md) [QCDS:Quality,Satisfaction]
 - [x] [P2] [Phase:03-design] 画像プレビューの表示倍率操作 [Issue](Issues/0005-issue.md) [QCDS:Quality,Satisfaction]
 - [x] [P2] [Phase:04-implementation] READMEを利用者向けに整備 [Issue](Issues/0006-readme.md) [QCDS:Quality,Satisfaction]
+- [x] [P2] [Phase:05-test] Twitter画像シェア機能の追加 [Issue](Issues/0010-twitter.md) [QCDS:Quality,Delivery,Satisfaction]
+- [ ] [P2] [Phase:02-specification] Twitter画像添付の完全自動化は静的サイト単体では blocked [Issue](Issues/0011-twitter-auto-attach-blocked.md) [QCDS:Quality,Delivery,Satisfaction]

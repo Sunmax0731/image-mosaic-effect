@@ -2,6 +2,16 @@ import { expect, test } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 
+declare global {
+  interface Window {
+    __lastClipboardWrite?: {
+      itemCount: number
+      type?: string
+      size: number
+    }
+  }
+}
+
 const SAMPLE_PNG =
   'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAgklEQVR4nO3YQQqAIBRA0Vb3v2sXbWFDkqJwHwZ+QRcS8mAqWgAAAAAAAAAAsK1r7d6jXqv3zvMSz+Z8vC0h1+fKr9xg7Gm9yq2c0h7j4GNQZ8wq+8YgkY1nJr9qB9p3s+3nAqv5Dk5xw9e8a6q4a3Vx0m9zAgAAAAAAAAAA8G8f9gE2pQZtfsd0sAAAAABJRU5ErkJggg=='
 
@@ -27,9 +37,41 @@ function sampleFolder(basePath: string, count = 6, prefix = 'folder') {
 test('imports images, toggles and resets the list, replaces folder imports, and exports a ZIP', async ({
   page,
 }, testInfo) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        write: async (items: ClipboardItem[]) => {
+          const item = items[0]
+          const type = item?.types[0]
+          const blob = type ? await item.getType(type) : undefined
+          window.__lastClipboardWrite = {
+            itemCount: items.length,
+            type,
+            size: blob?.size ?? 0,
+          }
+        },
+      },
+    })
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: (data: { files?: File[] }) => {
+        const file = data.files?.[0]
+        return data.files?.length === 1 && file?.type === 'image/png'
+      },
+    })
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: { title?: string; text?: string; files?: File[] }) => {
+        throw new Error(`Unexpected native share call: ${data.title ?? ''}`)
+      },
+    })
+  })
+
   await page.goto('/')
   await expect(page.getByRole('heading', { name: '画像モザイク加工' })).toBeVisible()
   await expect(page.getByText('画像なし')).toBeVisible()
+  await expect(page.getByTitle('画像を読み込むとTwitter共有できます')).toBeDisabled()
 
   await page.evaluate(() => window.imageMosaicEffect?.setLanguage('en'))
   await expect(page.getByRole('heading', { name: 'Image Mosaic Effect' })).toBeVisible()
@@ -70,6 +112,7 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await expect(page.getByTestId('mosaic-canvas')).toHaveCount(0)
 
   await page.getByTestId('file-input').setInputFiles(sampleFiles())
+  await expect(page.getByTitle('モザイク適用後にTwitter共有できます')).toBeDisabled()
 
   const isMobile = await page.evaluate(() => window.innerWidth <= 640)
   if (isMobile) {
@@ -176,10 +219,43 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
   await expect(page.locator('.selection')).toHaveCount(0)
 
   await expect(page.getByTitle('元に戻す')).toBeEnabled()
+  await expect(page.getByTitle('Twitterへ共有')).toBeEnabled()
   await page.getByTitle('Before/After確認').click()
-  await expect(page.getByTitle('After表示に戻す')).toHaveAttribute('aria-pressed', 'true')
-  await page.getByTitle('After表示に戻す').click()
+  await expect(page.getByRole('button', { name: 'After表示に戻す', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await expect(page.getByTitle('After表示に戻すとTwitter共有できます')).toBeDisabled()
+  await page.getByRole('button', { name: 'After表示に戻す', exact: true }).click()
   await expect(page.getByTitle('Before/After確認')).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByTitle('Twitterへ共有')).toBeEnabled()
+
+  await page.getByTitle('Twitterへ共有').click()
+  await expect(page.getByText('共有用画像を準備しました')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Twitter共有準備' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '画像をコピー' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Twitterを開く' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '画像を保存' })).toBeVisible()
+
+  await page.getByRole('button', { name: '画像をコピー' }).click()
+  await expect(
+    page.getByText('画像をコピーしました。Twitter投稿画面で貼り付けてください'),
+  ).toBeVisible()
+  const clipboardWrite = await page.evaluate(() => window.__lastClipboardWrite)
+  expect(clipboardWrite).toMatchObject({
+    itemCount: 1,
+    type: 'image/png',
+  })
+  expect(clipboardWrite?.size).toBeGreaterThan(0)
+  const openedUrl = await page.getByRole('link', { name: 'Twitterを開く' }).getAttribute('href')
+  expect(openedUrl).toContain('https://twitter.com/intent/tweet')
+  const tweetText = new URL(openedUrl ?? '').searchParams.get('text') ?? ''
+  expect(tweetText).toContain('#画像モザイク加工')
+  expect(tweetText).toContain('#ImageMosaicEffect')
+  expect(tweetText).toContain('https://sunmax0731.github.io/image-mosaic-effect/')
+  expect(tweetText).toBe(
+    '#画像モザイク加工 #ImageMosaicEffect\nhttps://sunmax0731.github.io/image-mosaic-effect/',
+  )
 
   await page.getByLabel('接尾辞').fill('_checked')
   const downloadPromise = page.waitForEvent('download')

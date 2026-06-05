@@ -17,6 +17,15 @@ export interface UiCopy {
     currentImageReset: string
     preparingExport: string
     exportFailed: string
+    preparingShare: string
+    shareStarted: string
+    shareFailed: string
+    shareUnsupported: string
+    shareCancelled: string
+    shareReady: string
+    shareImageCopied: string
+    shareImageCopyFailed: string
+    shareTwitterOpened: string
     imageListReset: string
     presetApplied: (name: string) => string
     imagesImported: (count: number) => string
@@ -52,6 +61,17 @@ export interface UiCopy {
     reset: string
     compareBefore: string
     compareAfter: string
+    shareTwitter: string
+    sharingTwitter: string
+    shareNeedsImage: string
+    shareNeedsMosaic: string
+    shareNeedsAfter: string
+    shareUnsupported: string
+    shareTrayLabel: string
+    shareReadyHint: string
+    copyTwitterImage: string
+    openTwitter: string
+    saveTwitterImage: string
     fitWidth: string
     fitHeight: string
     actualSize: string
@@ -101,6 +121,15 @@ export const UI_COPY: Record<Language, UiCopy> = {
       currentImageReset: '現在の画像をリセットしました',
       preparingExport: 'ZIPを書き出しています',
       exportFailed: '書き出しに失敗しました',
+      preparingShare: 'Twitter共有用の画像を準備しています',
+      shareStarted: '画像ファイル共有を開始しました',
+      shareFailed: 'Twitter共有を開始できませんでした',
+      shareUnsupported: 'このブラウザは画像付き共有に対応していません',
+      shareCancelled: 'Twitter共有をキャンセルしました',
+      shareReady: '共有用画像を準備しました',
+      shareImageCopied: '画像をコピーしました。Twitter投稿画面で貼り付けてください',
+      shareImageCopyFailed: '画像コピーに失敗しました。画像を保存して添付してください',
+      shareTwitterOpened: 'Twitter投稿画面を開きました',
       imageListReset: '画像一覧をリセットしました',
       presetApplied: (name) => `${name}を適用しました`,
       imagesImported: (count) => `${count}件の画像を読み込みました`,
@@ -137,6 +166,17 @@ export const UI_COPY: Record<Language, UiCopy> = {
       reset: 'この画像をリセット',
       compareBefore: 'Before/After確認',
       compareAfter: 'After表示に戻す',
+      shareTwitter: 'Twitterへ共有',
+      sharingTwitter: 'Twitter共有を準備中',
+      shareNeedsImage: '画像を読み込むとTwitter共有できます',
+      shareNeedsMosaic: 'モザイク適用後にTwitter共有できます',
+      shareNeedsAfter: 'After表示に戻すとTwitter共有できます',
+      shareUnsupported: '画像付き共有に対応したブラウザで利用できます',
+      shareTrayLabel: 'Twitter共有準備',
+      shareReadyHint: '画像をコピーしてからTwitterを開き、投稿欄へ貼り付けてください。',
+      copyTwitterImage: '画像をコピー',
+      openTwitter: 'Twitterを開く',
+      saveTwitterImage: '画像を保存',
       fitWidth: '幅に合わせる',
       fitHeight: '高さに合わせる',
       actualSize: '100%表示',
@@ -202,6 +242,15 @@ export const UI_COPY: Record<Language, UiCopy> = {
       currentImageReset: 'Current image reset',
       preparingExport: 'Preparing ZIP export',
       exportFailed: 'Export failed',
+      preparingShare: 'Preparing image for Twitter sharing',
+      shareStarted: 'Image file sharing started',
+      shareFailed: 'Twitter sharing could not start',
+      shareUnsupported: 'This browser does not support image file sharing',
+      shareCancelled: 'Twitter sharing cancelled',
+      shareReady: 'Share image prepared',
+      shareImageCopied: 'Image copied. Paste it into the Twitter composer.',
+      shareImageCopyFailed: 'Image copy failed. Save and attach the image instead.',
+      shareTwitterOpened: 'Twitter composer opened',
       imageListReset: 'Image list reset',
       presetApplied: (name) => `${name} applied`,
       imagesImported: (count) => `${count} images imported`,
@@ -238,6 +287,17 @@ export const UI_COPY: Record<Language, UiCopy> = {
       reset: 'Reset image',
       compareBefore: 'Before/After preview',
       compareAfter: 'Return to after preview',
+      shareTwitter: 'Share to Twitter',
+      sharingTwitter: 'Preparing Twitter share',
+      shareNeedsImage: 'Import an image to share to Twitter',
+      shareNeedsMosaic: 'Apply mosaic before sharing to Twitter',
+      shareNeedsAfter: 'Return to after preview before sharing',
+      shareUnsupported: 'Use a browser that supports image file sharing',
+      shareTrayLabel: 'Twitter share prep',
+      shareReadyHint: 'Copy the image, then open Twitter and paste it into the composer.',
+      copyTwitterImage: 'Copy image',
+      openTwitter: 'Open Twitter',
+      saveTwitterImage: 'Save image',
       fitWidth: 'Fit to width',
       fitHeight: 'Fit to height',
       actualSize: '100% view',

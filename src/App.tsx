@@ -5,9 +5,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Columns2,
+  Copy,
   Download,
   Eye,
   EyeOff,
+  ExternalLink,
   FolderOpen,
   Images,
   Maximize2,
@@ -15,6 +17,7 @@ import {
   RotateCcw,
   Rows2,
   ScanEye,
+  Share2,
   SlidersHorizontal,
   SquareDashedMousePointer,
   Trash2,
@@ -67,6 +70,12 @@ const STAGE_VIEW_PADDING = 44
 const MIN_ZOOM = 0.1
 const MAX_ZOOM = 4
 const ZOOM_STEP = 0.25
+const TWITTER_SHARE_FILE_NAME = 'image-mosaic-effect-twitter.png'
+const TWITTER_SHARE_TEXT = [
+  '#画像モザイク加工 #ImageMosaicEffect',
+  'https://sunmax0731.github.io/image-mosaic-effect/',
+].join('\n')
+const TWITTER_INTENT_URL = createTwitterIntentUrl(TWITTER_SHARE_TEXT)
 const TOOL_OPTIONS = [
   { id: 'brush', Icon: Brush },
   { id: 'rectangle', Icon: SquareDashedMousePointer },
@@ -83,6 +92,10 @@ type SelectionOverlay = {
   shape: 'rect' | 'circle'
   rect: Rect
 }
+type SharePanelState = {
+  blob: Blob
+  imageId: string
+}
 
 type StatusState =
   | { key: 'settingsSaved' }
@@ -92,6 +105,15 @@ type StatusState =
   | { key: 'currentImageReset' }
   | { key: 'preparingExport' }
   | { key: 'exportFailed' }
+  | { key: 'preparingShare' }
+  | { key: 'shareStarted' }
+  | { key: 'shareFailed' }
+  | { key: 'shareUnsupported' }
+  | { key: 'shareCancelled' }
+  | { key: 'shareReady' }
+  | { key: 'shareImageCopied' }
+  | { key: 'shareImageCopyFailed' }
+  | { key: 'shareTwitterOpened' }
   | { key: 'imageListReset' }
   | { key: 'presetApplied'; preset: string }
   | { key: 'imagesImported'; count: number }
@@ -120,6 +142,8 @@ function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('fit-width')
   const [zoomScale, setZoomScale] = useState(1)
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('edit')
+  const [isSharingPreview, setIsSharingPreview] = useState(false)
+  const [sharePanel, setSharePanel] = useState<SharePanelState | null>(null)
   const [stageSize, setStageSize] = useState({ width: 1, height: 1 })
   const [status, setStatus] = useState<StatusState>({ key: 'settingsSaved' })
 
@@ -146,6 +170,16 @@ function App() {
   const editedCount = images.filter((image) => image.operations.length > 0).length
   const copy = UI_COPY[language]
   const statusText = getStatusText(copy, status)
+  const shareAvailability = useMemo(
+    () =>
+      getShareAvailability({
+        activeImage,
+        copy,
+        isSharingPreview,
+        showBefore,
+      }),
+    [activeImage, copy, isSharingPreview, showBefore],
+  )
   const effectiveScale = useMemo(() => {
     const availableWidth = Math.max(1, stageSize.width - STAGE_VIEW_PADDING)
     const availableHeight = Math.max(1, stageSize.height - STAGE_VIEW_PADDING)
@@ -275,6 +309,7 @@ function App() {
     panSessionRef.current = null
     setSelection(null)
     setShowBefore(false)
+    setSharePanel(null)
   }, [])
 
   const applyPreset = useCallback(
@@ -369,6 +404,7 @@ function App() {
             : entry,
         ),
       )
+      setSharePanel(null)
     },
     [activeImage],
   )
@@ -424,6 +460,7 @@ function App() {
           : entry,
       ),
     )
+    setSharePanel(null)
     setStatus({ key: 'lastOperationRemoved' })
   }, [activeImage])
 
@@ -439,8 +476,59 @@ function App() {
           : entry,
       ),
     )
+    setSharePanel(null)
     setStatus({ key: 'currentImageReset' })
   }, [activeImage])
+
+  const prepareTwitterShare = useCallback(async () => {
+    if (
+      !activeImage ||
+      !activeImage.operations.length ||
+      showBefore ||
+      isSharingPreview
+    ) {
+      setStatus({ key: 'shareUnsupported' })
+      return
+    }
+
+    setIsSharingPreview(true)
+    setStatus({ key: 'preparingShare' })
+
+    try {
+      const blob = await renderImageBlob(
+        activeImage.url,
+        activeImage.operations,
+        'png',
+        settings.jpegQuality,
+      )
+      setSharePanel({
+        blob,
+        imageId: activeImage.id,
+      })
+      setStatus({ key: 'shareReady' })
+    } catch {
+      setStatus({ key: 'shareFailed' })
+    } finally {
+      setIsSharingPreview(false)
+    }
+  }, [activeImage, isSharingPreview, settings.jpegQuality, showBefore])
+
+  const copyPreparedShareImage = useCallback(async () => {
+    if (!sharePanel) {
+      return
+    }
+
+    const copied = await copyImageBlobToClipboard(sharePanel.blob)
+    setStatus({ key: copied ? 'shareImageCopied' : 'shareImageCopyFailed' })
+  }, [sharePanel])
+
+  const downloadPreparedShareImage = useCallback(() => {
+    if (!sharePanel) {
+      return
+    }
+
+    downloadBlob(sharePanel.blob, TWITTER_SHARE_FILE_NAME)
+  }, [sharePanel])
 
   const goToImage = useCallback(
     (offset: number) => {
@@ -862,6 +950,16 @@ function App() {
               </button>
               <button
                 type="button"
+                className="icon-button share-button"
+                aria-label={copy.editor.shareTwitter}
+                title={shareAvailability.title}
+                disabled={!shareAvailability.enabled}
+                onClick={prepareTwitterShare}
+              >
+                <Share2 aria-hidden="true" />
+              </button>
+              <button
+                type="button"
                 className="icon-button"
                 title={copy.editor.undo}
                 disabled={!activeImage?.operations.length}
@@ -879,6 +977,29 @@ function App() {
                 <RotateCcw aria-hidden="true" />
               </button>
             </div>
+            {sharePanel && activeImage?.id === sharePanel.imageId && (
+              <div className="share-tray" role="region" aria-label={copy.editor.shareTrayLabel}>
+                <span>{copy.editor.shareReadyHint}</span>
+                <button type="button" className="button" onClick={copyPreparedShareImage}>
+                  <Copy aria-hidden="true" />
+                  {copy.editor.copyTwitterImage}
+                </button>
+                <a
+                  className="button share-link"
+                  href={TWITTER_INTENT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setStatus({ key: 'shareTwitterOpened' })}
+                >
+                  <ExternalLink aria-hidden="true" />
+                  {copy.editor.openTwitter}
+                </a>
+                <button type="button" className="button" onClick={downloadPreparedShareImage}>
+                  <Download aria-hidden="true" />
+                  {copy.editor.saveTwitterImage}
+                </button>
+              </div>
+            )}
           </div>
 
           <div ref={stageRef} className={`stage ${activeImage ? 'has-image' : ''}`}>
@@ -1104,6 +1225,64 @@ function isMobileImageListViewport() {
   }
 
   return window.matchMedia?.(MOBILE_IMAGE_LIST_QUERY).matches ?? window.innerWidth <= 640
+}
+
+async function copyImageBlobToClipboard(blob: Blob) {
+  if (
+    typeof navigator === 'undefined' ||
+    typeof navigator.clipboard?.write !== 'function' ||
+    typeof ClipboardItem === 'undefined'
+  ) {
+    return false
+  }
+
+  try {
+    const clipboardBlob = blob.type === 'image/png' ? blob : new Blob([blob], { type: 'image/png' })
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        [clipboardBlob.type || 'image/png']: clipboardBlob,
+      }),
+    ])
+    return true
+  } catch {
+    return false
+  }
+}
+
+function createTwitterIntentUrl(text: string) {
+  const url = new URL('https://twitter.com/intent/tweet')
+  url.searchParams.set('text', text)
+  return url.toString()
+}
+
+function getShareAvailability({
+  activeImage,
+  copy,
+  isSharingPreview,
+  showBefore,
+}: {
+  activeImage: ImageEntry | undefined
+  copy: UiCopy
+  isSharingPreview: boolean
+  showBefore: boolean
+}) {
+  if (isSharingPreview) {
+    return { enabled: false, title: copy.editor.sharingTwitter }
+  }
+
+  if (!activeImage) {
+    return { enabled: false, title: copy.editor.shareNeedsImage }
+  }
+
+  if (!activeImage.operations.length) {
+    return { enabled: false, title: copy.editor.shareNeedsMosaic }
+  }
+
+  if (showBefore) {
+    return { enabled: false, title: copy.editor.shareNeedsAfter }
+  }
+
+  return { enabled: true, title: copy.editor.shareTwitter }
 }
 
 function getBrushPointRect(point: CanvasPoint, brushSize: number): Rect {

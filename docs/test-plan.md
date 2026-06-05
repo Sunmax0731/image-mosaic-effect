@@ -8,7 +8,7 @@
   - Vitest unit tests for settings schema, file names, mosaic geometry, i18n, and preset sizing.
   - TypeScript build and Vite production build.
 - `npm run test:e2e`
-  - Playwright Chromium checks for Japanese default UI, internal language switching API, nonblank render, one-row primary import/export controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, image-list reset, folder import list replacement, auto list reset after export, multi-image import, official Fantia logo presets with shortened visible labels, icon-only Skeb preset, Before/After toggle, circular brush cursor visualization, preview fit/zoom/pan controls, mobile auto-collapse after queue selection, larger thumbnail-only queue, internal queue scrolling, visible canvas position, mobile horizontal settings groups, single-button settings panel toggle, hidden editor status text, canvas edit, settings persistence, and ZIP export.
+  - Playwright Chromium checks for Japanese default UI, internal language switching API, nonblank render, one-row primary import/export controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, image-list reset, folder import list replacement, auto list reset after export, multi-image import, official Fantia logo presets with shortened visible labels, icon-only Skeb preset, Before/After toggle, circular brush cursor visualization, preview fit/zoom/pan controls, Twitter share disabled states, share tray rendering, mocked Clipboard API receiving exactly one edited PNG file from the dedicated copy action, Twitter intent link containing the user-specified hashtags/URL text, mobile auto-collapse after queue selection, larger thumbnail-only queue, internal queue scrolling, visible canvas position, mobile horizontal settings groups, single-button settings panel toggle, hidden editor status text, canvas edit, settings persistence, and ZIP export.
   - Desktop Chrome and mobile Chrome projects are configured.
 
 ## Runtime Gate
@@ -32,16 +32,19 @@ Platform gate for WebApp:
 15. Confirm brush drag operations display a circular cursor for the current brush footprint, and rectangle drags display a rectangular range while dragging.
 16. Confirm Before/After toggles original and edited preview without removing operations.
 17. Confirm fit-to-width, fit-to-height, 100%, zoom in/out, and pan change the preview only.
-18. On smartphone width, select a thumbnail and confirm the image list collapses automatically, then can be reopened.
-19. Hide and show the settings panel from the same always-visible toolbar button.
-20. Confirm `window.imageMosaicEffect.setLanguage('en')` switches copy internally and `setLanguage('ja')` restores Japanese.
-21. Confirm `Original extension` is the default export format.
-22. Apply a brush or rectangle mosaic operation.
-23. Change a persisted setting and reload to confirm it remains.
-24. Export all and confirm a ZIP download is produced and the image list is cleared after the export.
+18. Confirm Twitter share is disabled before a mosaic operation, disabled while Before view is active, and enabled after returning to the edited preview.
+19. Confirm Twitter share renders the share tray, the dedicated copy action copies exactly one PNG file for the active edited image to Clipboard API, and the Twitter intent link contains only `#画像モザイク加工 #ImageMosaicEffect` and `https://sunmax0731.github.io/image-mosaic-effect/` without adding app-side upload or remote processing paths.
+20. On smartphone width, select a thumbnail and confirm the image list collapses automatically, then can be reopened.
+21. Hide and show the settings panel from the same always-visible toolbar button.
+22. Confirm `window.imageMosaicEffect.setLanguage('en')` switches copy internally and `setLanguage('ja')` restores Japanese.
+23. Confirm `Original extension` is the default export format.
+24. Apply a brush or rectangle mosaic operation.
+25. Change a persisted setting and reload to confirm it remains.
+26. Export all and confirm a ZIP download is produced and the image list is cleared after the export.
 
 ## Manual Mobile Notes
 
 - See [docs/user-guide.md](user-guide.md) for the user-facing manual checklist.
 - On mobile browsers, folder picking may be unavailable or converted into photo-library selection.
 - ZIP export support should be confirmed on the target phone because download handling differs between mobile browsers.
+- Twitter image copy depends on Clipboard API image write support and browser permission. Twitter Web Intent itself cannot attach local browser files directly, so image copy and Twitter opening are kept as separate user actions, and `画像を保存` is the fallback when clipboard writing is denied.

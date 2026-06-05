@@ -12,7 +12,7 @@ The primary user is doing repeated manual review on a smartphone or desktop brow
 
 - Top toolbar: app identity, import files, import folder, export all, settings-save status, the single settings show/hide toggle, and settings reset.
 - Queue panel: large thumbnail-only buttons, edited-count summary, list visibility toggle, list reset action, and internal scrolling for large batches. The visible `画像一覧` heading is intentionally omitted to reserve space for images.
-- Canvas panel: current image, preview fit/zoom/pan controls, before/after toggle, brush/rectangle editing, undo/reset, and previous/next navigation without editor status text.
+- Canvas panel: current image, preview fit/zoom/pan controls, before/after toggle, Twitter share, brush/rectangle editing, undo/reset, and previous/next navigation without editor status text.
 - Settings panel: logo-backed Fantia/Skeb presets, mosaic type, tool, brush size, block size, strength, suffix, and export format. The visible `設定` heading is intentionally omitted to keep the tool area compact.
 
 ## UI Direction
@@ -35,6 +35,7 @@ The primary user is doing repeated manual review on a smartphone or desktop brow
 - Before/After is a preview-only state: it redraws the active canvas from the original image while preserving the current operation list.
 - Preview fit, 100%, zoom, and pan affect only CSS display size and scroll position; canvas pixels, edit coordinates, and export output remain tied to the original image dimensions.
 - Brush drags show the current brush footprint as a circular cursor while the operation is in progress; rectangle drags keep the rectangular range overlay.
+- Twitter share renders only the active image's edited operation list to one PNG file and then shows a share tray. Clipboard image copy and Twitter Web Intent opening are separate user actions because doing `window.open()` and `clipboard.write()` in the same click can consume the transient activation needed for clipboard writes. Twitter Web Intent cannot attach a local browser image directly, so the user copies or saves the prepared PNG, opens Twitter with service text, hashtags, and `https://sunmax0731.github.io/image-mosaic-effect/`, then pastes or attaches the image. The action is disabled when no image is loaded, no mosaic operation exists, or Before view is active.
 - No server or upload affordance because local privacy is part of the product contract.
 
 ## Responsive Behavior
