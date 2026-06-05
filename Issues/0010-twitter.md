@@ -35,6 +35,8 @@
 - 追加調整: スマホ幅では共有パネルがツールバー/内部スクロールに隠れる可能性があるため、`max-width: 640px` では画面下部の固定パネルとして表示する。
 - 自動添付ブロック: X/Twitter Web Intent は `text`、`url`、`hashtags` などの投稿文パラメータを受け取れるが、ローカル画像ファイルを自動添付するパラメータはない。完全自動添付には X API の media upload と OAuth、またはブラウザ拡張/外部自動化が必要で、静的サイト・ローカル画像維持の契約外になる。
 
+- 2026-06-05 mobile follow-up: canvas toolbar button placement was adjusted only under `max-width: 640px`; preview/zoom controls are centered on the first row, edit actions are centered in a compact 6-button grid on the second row, and horizontal toolbar scrolling is avoided.
+
 ## Codex Sessions
 
 - 2026-06-05T04:41:02.636Z `codex-session-20260605044102-o6d1k0` - Work Item: Twitter画像シェア機能の追加 (VS Code Codex handoff); access=danger-full-access; model=gpt-5.5; intelligence=xhigh; [prompt](c:/Users/gkkjh/AppData/Roaming/Code/User/workspaceStorage/2b6404d157bb45a1a5a4c8eeb27a7cab/sunmax0731.codex-friendly-project-starter/first-prompt-20260605T044102Z.md)

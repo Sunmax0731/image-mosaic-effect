@@ -716,31 +716,36 @@ input[type='range'] {
   }
 
   .canvas-toolbar {
-    align-items: stretch;
+    align-items: center;
     flex-direction: column;
     gap: 8px;
-    padding: 12px;
+    padding: 10px 12px;
   }
 
   .view-controls {
     width: 100%;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
+    display: grid;
+    grid-template-columns: max-content max-content;
+    justify-content: center;
+    gap: 8px;
+    overflow: visible;
+    padding-bottom: 0;
   }
 
   .edit-actions {
     width: 100%;
-    justify-content: space-between;
-    overflow-x: auto;
-    padding-bottom: 2px;
+    display: grid;
+    grid-template-columns: repeat(6, 34px);
+    justify-content: center;
+    gap: 9px;
+    overflow: visible;
+    padding-bottom: 0;
   }
 
-  .view-controls .icon-button {
-    flex: 0 0 34px;
-  }
-
+  .view-controls .icon-button,
   .edit-actions .icon-button {
+    width: 34px;
+    height: 34px;
     flex: 0 0 34px;
   }
 
@@ -765,7 +770,7 @@ input[type='range'] {
   }
 
   .zoom-level {
-    min-width: 44px;
+    min-width: 42px;
     align-self: center;
   }
 

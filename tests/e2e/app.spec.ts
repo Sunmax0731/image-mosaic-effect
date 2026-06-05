@@ -171,6 +171,28 @@ test('imports images, toggles and resets the list, replaces folder imports, and 
       .first()
       .evaluate((row) => Math.round(row.getBoundingClientRect().width))
     expect(firstThumbWidth).toBeGreaterThanOrEqual(160)
+
+    const toolbarMetrics = await page.locator('.canvas-toolbar').evaluate((toolbar) => {
+      const viewControls = toolbar.querySelector('.view-controls') as HTMLElement | null
+      const editActions = toolbar.querySelector('.edit-actions') as HTMLElement | null
+      const controls = [...toolbar.querySelectorAll<HTMLElement>('.icon-button')]
+
+      return {
+        viewScrolls: viewControls
+          ? viewControls.scrollWidth > viewControls.clientWidth + 1
+          : true,
+        editScrolls: editActions ? editActions.scrollWidth > editActions.clientWidth + 1 : true,
+        controlsWithinViewport: controls.every((control) => {
+          const rect = control.getBoundingClientRect()
+          return rect.left >= 0 && rect.right <= window.innerWidth
+        }),
+      }
+    })
+    expect(toolbarMetrics).toEqual({
+      viewScrolls: false,
+      editScrolls: false,
+      controlsWithinViewport: true,
+    })
   }
 
   await page.getByLabel('接尾辞').fill('_temporary')

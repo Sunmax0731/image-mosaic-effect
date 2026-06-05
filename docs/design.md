@@ -26,6 +26,7 @@ The primary user is doing repeated manual review on a smartphone or desktop brow
 - Loaded images can be cleared manually; successful batch export also clears the image list so the next batch starts from a clean state.
 - Page-level scrolling is avoided in the primary editor; queue, canvas, and settings surfaces scroll internally when needed.
 - Smartphone settings use horizontal groups for mosaic/tool selection, range controls, and output fields to avoid settings-panel scrolling.
+- Smartphone canvas toolbar groups preview/zoom controls on the first row and edit actions on a centered compact grid on the second row, avoiding wide `space-between` gaps and horizontal toolbar scrolling.
 - Smartphone queue selection automatically collapses the image list after a thumbnail is chosen, keeping the selected image close to the top of the editing flow.
 - Active images align near the top of the canvas work area so imported content is visible immediately.
 - File names, image dimensions, byte sizes, editor state text, and bottom progress/tool text are hidden to keep the review surface visual-first.

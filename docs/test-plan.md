@@ -8,7 +8,7 @@
   - Vitest unit tests for settings schema, file names, mosaic geometry, i18n, and preset sizing.
   - TypeScript build and Vite production build.
 - `npm run test:e2e`
-  - Playwright Chromium checks for Japanese default UI, internal language switching API, nonblank render, one-row primary import/export controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, image-list reset, folder import list replacement, auto list reset after export, multi-image import, official Fantia logo presets with shortened visible labels, icon-only Skeb preset, Before/After toggle, circular brush cursor visualization, preview fit/zoom/pan controls, Twitter share disabled states, share tray rendering, mocked Clipboard API receiving exactly one edited PNG file from the dedicated copy action, Twitter intent link containing the user-specified hashtags/URL text, mobile auto-collapse after queue selection, larger thumbnail-only queue, internal queue scrolling, visible canvas position, mobile horizontal settings groups, single-button settings panel toggle, hidden editor status text, canvas edit, settings persistence, and ZIP export.
+  - Playwright Chromium checks for Japanese default UI, internal language switching API, nonblank render, one-row primary import/export controls, top-toolbar settings reset, hidden queue/settings section headings, image-list show/hide toggle, image-list reset, folder import list replacement, auto list reset after export, multi-image import, official Fantia logo presets with shortened visible labels, icon-only Skeb preset, Before/After toggle, circular brush cursor visualization, preview fit/zoom/pan controls, mobile canvas-toolbar grouping without horizontal scrolling, Twitter share disabled states, share tray rendering, mocked Clipboard API receiving exactly one edited PNG file from the dedicated copy action, Twitter intent link containing the user-specified hashtags/URL text, mobile auto-collapse after queue selection, larger thumbnail-only queue, internal queue scrolling, visible canvas position, mobile horizontal settings groups, single-button settings panel toggle, hidden editor status text, canvas edit, settings persistence, and ZIP export.
   - Desktop Chrome and mobile Chrome projects are configured.
 
 ## Runtime Gate
@@ -32,15 +32,16 @@ Platform gate for WebApp:
 15. Confirm brush drag operations display a circular cursor for the current brush footprint, and rectangle drags display a rectangular range while dragging.
 16. Confirm Before/After toggles original and edited preview without removing operations.
 17. Confirm fit-to-width, fit-to-height, 100%, zoom in/out, and pan change the preview only.
-18. Confirm Twitter share is disabled before an image preview is generated, enabled after image load, disabled while Before view is active, and enabled after returning to the edited preview.
-19. Confirm Twitter share renders the share tray, the dedicated copy action copies exactly one PNG file for the current after-preview canvas to Clipboard API, and the Twitter intent link contains only `#画像モザイク加工 #ImageMosaicEffect` and `https://sunmax0731.github.io/image-mosaic-effect/` without adding app-side upload or remote processing paths.
-20. On smartphone width, select a thumbnail and confirm the image list collapses automatically, then can be reopened.
-21. Hide and show the settings panel from the same always-visible toolbar button.
-22. Confirm `window.imageMosaicEffect.setLanguage('en')` switches copy internally and `setLanguage('ja')` restores Japanese.
-23. Confirm `Original extension` is the default export format.
-24. Apply a brush or rectangle mosaic operation.
-25. Change a persisted setting and reload to confirm it remains.
-26. Export all and confirm a ZIP download is produced and the image list is cleared after the export.
+18. On smartphone width, confirm the canvas toolbar keeps preview controls and edit actions in centered compact groups without horizontal scrolling or controls outside the viewport.
+19. Confirm Twitter share is disabled before an image preview is generated, enabled after image load, disabled while Before view is active, and enabled after returning to the edited preview.
+20. Confirm Twitter share renders the share tray, the dedicated copy action copies exactly one PNG file for the current after-preview canvas to Clipboard API, and the Twitter intent link contains only `#画像モザイク加工 #ImageMosaicEffect` and `https://sunmax0731.github.io/image-mosaic-effect/` without adding app-side upload or remote processing paths.
+21. On smartphone width, select a thumbnail and confirm the image list collapses automatically, then can be reopened.
+22. Hide and show the settings panel from the same always-visible toolbar button.
+23. Confirm `window.imageMosaicEffect.setLanguage('en')` switches copy internally and `setLanguage('ja')` restores Japanese.
+24. Confirm `Original extension` is the default export format.
+25. Apply a brush or rectangle mosaic operation.
+26. Change a persisted setting and reload to confirm it remains.
+27. Export all and confirm a ZIP download is produced and the image list is cleared after the export.
 
 ## Manual Mobile Notes
 
